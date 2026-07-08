@@ -10,27 +10,29 @@ export class ApplicationsRepository extends BaseRepository<Application, any, any
   }
 
   async getDetails(tenantId: string, id: string): Promise<Application | null> {
-    return this.prisma.application.findFirst({
-      where: { id, tenantId },
-      include: {
-        customer: {
-          select: { id: true, name: true, email: true, phone: true },
-        },
-        documents: true,
-        notes: {
-          include: {
-            author: { select: { id: true, name: true } },
+    return this.prisma.$withTenant(tenantId, (tx) => 
+      tx.application.findFirst({
+        where: { id, tenantId },
+        include: {
+          customer: {
+            select: { id: true, name: true, email: true, phone: true },
           },
-          orderBy: { createdAt: 'desc' },
-        },
-        auditLogs: {
-          include: {
-            user: { select: { id: true, name: true } },
+          documents: true,
+          notes: {
+            include: {
+              author: { select: { id: true, name: true } },
+            },
+            orderBy: { createdAt: 'desc' },
           },
-          orderBy: { createdAt: 'desc' },
+          auditLogs: {
+            include: {
+              user: { select: { id: true, name: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
         },
-      },
-    }) as any;
+      })
+    ) as any;
   }
 
   async addNote(applicationId: string, authorId: string, content: string) {

@@ -14,6 +14,7 @@ export default function OnboardingPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, string>>({});
   const [appId, setAppId] = useState<string | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   // Load checklist dynamically when destination changes
   useEffect(() => {
@@ -174,6 +175,22 @@ export default function OnboardingPage() {
                   )}
                 </div>
               </div>
+
+              {/* Saudi Data Privacy Compliance Consent Box */}
+              <div style={{ display: 'flex', gap: '10px', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', padding: '12px', borderRadius: '10px', marginTop: '10px' }}>
+                <input 
+                  type="checkbox" 
+                  id="consent-check" 
+                  checked={consentChecked}
+                  onChange={(e) => setConsentChecked(e.target.checked)}
+                  style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer' }}
+                />
+                <label htmlFor="consent-check" style={{ fontSize: '0.78rem', lineHeight: 1.4, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  {lang === 'ar' 
+                    ? 'أوافق بموجب هذا صراحةً على جمع ومعالجة بياناتي الحساسة ووثائق السفر الخاصة بي للغرض المحدد وفقاً للائحة التنفيذية لنظام حماية البيانات الشخصية الصادر عن سدايا (SDAIA).' 
+                    : 'I hereby explicitly consent to the collection and processing of my sensitive PII and travel documents for the specified purpose in compliance with Saudi PDPL regulations under SDAIA.'}
+                </label>
+              </div>
             </div>
           )}
 
@@ -183,7 +200,11 @@ export default function OnboardingPage() {
                 {t('back')}
               </button>
             )}
-            <button className="btn btn-primary w-full" onClick={handleNext} disabled={step === 1 && !destination}>
+            <button 
+              className="btn btn-primary w-full" 
+              onClick={handleNext} 
+              disabled={(step === 1 && !destination) || (step === 3 && !consentChecked)}
+            >
               {step === 3 ? (lang === 'ar' ? 'تقديم الطلب النهائي' : 'Submit Application') : t('next')}
             </button>
           </div>

@@ -33,4 +33,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
     this.logger.log('Database disconnected');
   }
+
+  /**
+   * Scopes all queries inside the execution callback to a specific tenant
+   * using database-level Row-Level Security (RLS).
+   */
+  async $withTenant<T>(tenantId: string, run: (tx: any) => Promise<T>): Promise<T> {
+    return this.$transaction(async (tx) => {
+      // Set the session context parameter before executing the query block
+      await tx.$executeRawUnsafe(`SET LOCAL app.current_tenant_id = '${tenantId}';`);
+      return run(tx);
+    });
+  }
 }

@@ -27,6 +27,12 @@ export const appConfig = registerAs('app', () => ({
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
   supabaseStorageBucket:  process.env.STORAGE_BUCKET            ?? 'visaflow',
 
+  /** AWS S3 */
+  awsRegion:          process.env.AWS_REGION           ?? 'me-central-1',
+  awsAccessKeyId:     process.env.AWS_ACCESS_KEY_ID    ?? '',
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+  awsS3Bucket:        process.env.AWS_S3_BUCKET        ?? 'visaflow-sensitive-vault',
+
   /** Redis (BullMQ) */
   redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
 

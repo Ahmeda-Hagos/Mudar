@@ -22,7 +22,7 @@ export class ProviderRegistryService implements OnModuleInit {
 ├────────────────────────────────────────────────────────┤
 │   Active Node Env   : ${nodeEnv.padEnd(25)}│
 │   Auth Provider     : Supabase Auth Adapter             │
-│   Storage Provider  : Supabase Storage Adapter          │
+│   Storage Provider  : AWS S3 Storage Adapter            │
 │   Email Provider    : ${emailProvider.padEnd(28)}│
 └────────────────────────────────────────────────────────┘
     `);

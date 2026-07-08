@@ -82,4 +82,22 @@ export class DocumentsController {
       publicUrl,
     };
   }
+
+  @Post(':id/presigned-url')
+  @ApiOperation({ summary: 'Generate secure pre-signed download URL (expires in 60 seconds)' })
+  async getPresignedUrl(
+    @TenantId() tenantId: string,
+    @Body('documentId') documentId: string,
+  ) {
+    const document = await this.prisma.document.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new BadRequestException('Document reference not found');
+    }
+
+    const url = await this.storageService.getPresignedUrl(tenantId, document.storagePath, 60);
+    return { url };
+  }
 }

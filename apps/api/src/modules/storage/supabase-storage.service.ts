@@ -139,4 +139,19 @@ export class SupabaseStorageService implements IStorageService {
 
     return (currentUsed + BigInt(incomingSizeBytes)) <= quota;
   }
+
+  async getPresignedUrl(tenantId: string, storagePath: string, expiresInSeconds = 60): Promise<string> {
+    if (!storagePath.startsWith(`${tenantId}/`)) {
+      throw new BadRequestException('Unauthorized storage resource access attempt');
+    }
+
+    if (this.supabase) {
+      const { data } = this.supabase.storage
+        .from(this.bucketName)
+        .getPublicUrl(storagePath);
+      return data.publicUrl;
+    }
+
+    return `https://mock.supabase.storage/object/public/${this.bucketName}/${storagePath}`;
+  }
 }

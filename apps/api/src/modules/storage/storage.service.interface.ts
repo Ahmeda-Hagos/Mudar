@@ -27,6 +27,12 @@ export interface IStorageService {
   deleteFile(tenantId: string, storagePath: string): Promise<void>;
 
   /**
+   * Generates a transient pre-signed download URL for secure document retrieval.
+   * expiresInSeconds parameter enforces access expiration (e.g. 60 seconds).
+   */
+  getPresignedUrl(tenantId: string, storagePath: string, expiresInSeconds?: number): Promise<string>;
+
+  /**
    * Evaluates if the tenant has enough quota space for an upcoming upload.
    */
   verifyQuota(tenantId: string, incomingSizeBytes: number): Promise<boolean>;
