@@ -32,12 +32,20 @@ jobs:
 
     - name: Run Prisma Code Generation
       run: npm run prisma:generate --workspace=visaflow-backend
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
 
     - name: Execute Workspace Test Suites
       run: npm run test --if-present
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
 
     - name: Compile Backend API Application Bundle
       run: npm run build:api
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
 
     - name: Compile Frontend Web Client Bundle
       run: npm run build:web
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
