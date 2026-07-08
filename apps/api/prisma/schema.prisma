@@ -1,0 +1,244 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id                String             @id @default(uuid())
+  name              String
+  slug              String             @unique
+  logo              String?
+  settings          Json               @default("{}")
+  users             User[]
+  templates         Template[]
+  formTemplates     FormTemplate[]
+  subscriptions     Subscription[]
+  storageUsedBytes  BigInt             @default(0)
+  storageQuotaBytes BigInt             @default(5368709120) // default 5 GB
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([slug])
+}
+
+model User {
+  id                 String         @id @default(uuid())
+  name               String
+  email              String         @unique
+  password           String         // bcrypt hashed
+  phone              String?
+  role               Role           @default(CUSTOMER)
+  isActive           Boolean        @default(true)
+  tenantId           String
+  tenant             Tenant         @relation(fields: [tenantId], references: [id])
+  twoFactorCode      String?
+  twoFactorExpiresAt DateTime?
+  applications       Application[]
+  notes              Note[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([tenantId])
+  @@index([email])
+}
+
+model Application {
+  id                 String              @id @default(uuid())
+  appNumber          String              @unique
+  customerId         String
+  customer           User                @relation(fields: [customerId], references: [id])
+  destination        String
+  travelDate         DateTime
+  travelers          Int
+  isGroup            Boolean             @default(false)
+  isUrgent           Boolean             @default(false)
+  status             AppStatus           @default(NEW_REQUEST)
+  documents          Document[]
+  notes              Note[]
+  missingDocs        MissingDoc[]
+  auditLogs          AuditLog[]
+  extractedData      Json?
+  travelAccommodation Json?              // Holds hotelName, hotelAddress, checkInDate, checkOutDate, etc.
+  tenantId           String
+  assignedToId       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([assignedToId])
+  @@index([status])
+}
+
+model Document {
+  id                 String      @id @default(uuid())
+  applicationId      String
+  application        Application @relation(fields: [applicationId], references: [id])
+  type               String
+  filename           String
+  storagePath        String
+  mimeType           String
+  sizeBytes          Int
+  ocrData            Json?
+  validationWarnings Json?
+  uploadedAt         DateTime    @default(now())
+
+  @@index([applicationId])
+}
+
+model MissingDoc {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  type          String
+  description   String?
+  status        String      @default("PENDING") // PENDING, UPLOADED
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
+}
+
+model Template {
+  id            String   @id @default(uuid())
+  country       String
+  countryCode   String
+  requiredDocs  Json     // string[]
+  optionalDocs  Json     // string[]
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model FormTemplate {
+  id            String             @id @default(uuid())
+  country       String
+  countryCode   String
+  formName      String
+  pdfBase64     String             @db.Text
+  fieldMappings Json               // holds parsed AcroForm mapping schema
+  status        FormTemplateStatus @default(DRAFT)
+  tenantId      String?            // Nullable for Global Templates
+  tenant        Tenant?            @relation(fields: [tenantId], references: [id])
+  fillHistory   FillHistory[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([tenantId])
+}
+
+model FillHistory {
+  id             String       @id @default(uuid())
+  applicationId  String
+  formTemplateId String
+  formTemplate   FormTemplate @relation(fields: [formTemplateId], references: [id])
+  formName       String
+  countryCode    String
+  filledByName   String
+  completionPct  Int
+  missingFields  Json         // string[]
+  createdAt      DateTime     @default(now())
+
+  @@index([applicationId])
+  @@index([formTemplateId])
+}
+
+model Subscription {
+  id                 String            @id @default(uuid())
+  tenantId           String
+  tenant             Tenant            @relation(fields: [tenantId], references: [id])
+  plan               SubscriptionPlan  @default(STARTER)
+  status             String            @default("ACTIVE") // ACTIVE, TRIALING, PAST_DUE, CANCELED
+  billingCycle       String            @default("MONTHLY") // MONTHLY, ANNUAL
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime          @default(now())
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean           @default(false)
+  stripeSubscriptionId String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([tenantId])
+}
+
+model Note {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  authorId      String
+  author        User        @relation(fields: [authorId], references: [id])
+  content       String
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  applicationId String?
+  type          String
+  title         String
+  titleAr       String
+  body          String
+  bodyAr        String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id            String      @id @default(uuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  action        String
+  fromStatus    String?
+  toStatus      String?
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EMPLOYEE
+  CUSTOMER
+}
+
+enum AppStatus {
+  NEW_REQUEST
+  WAITING_DOCUMENTS
+  UNDER_REVIEW
+  READY_FOR_BOOKING
+  APPOINTMENT_BOOKED
+  RESERVATIONS_PREPARED
+  READY_FOR_PICKUP
+  COMPLETED
+}
+
+enum FormTemplateStatus {
+  DRAFT
+  APPROVED
+  ARCHIVED
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}

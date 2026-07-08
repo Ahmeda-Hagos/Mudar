@@ -1,0 +1,43 @@
+name: CI/CD Pipeline Automation
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install Workspace Dependencies
+      run: npm install
+
+    - name: Run Code Formatting Linter Check
+      run: npm run lint --if-present
+
+    - name: Run Prisma Code Generation
+      run: npm run prisma:generate --workspace=visaflow-backend
+
+    - name: Execute Workspace Test Suites
+      run: npm run test --if-present
+
+    - name: Compile Backend API Application Bundle
+      run: npm run build:api
+
+    - name: Compile Frontend Web Client Bundle
+      run: npm run build:web

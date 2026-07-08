@@ -1,0 +1,36 @@
+# Logs & Local Development
+.env
+.env.local
+.env.*.local
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+jspm_packages/
+web_modules/
+
+# Next.js Build Output
+.next/
+out/
+build/
+dist/
+
+# IDE / System
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Prisma Generated Client (Optional since it is in node_modules, but keep clean)
+/apps/api/prisma/migrations/
