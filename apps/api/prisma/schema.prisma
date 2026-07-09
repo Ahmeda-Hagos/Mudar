@@ -37,6 +37,10 @@ model User {
   tenant             Tenant         @relation(fields: [tenantId], references: [id])
   twoFactorCode      String?
   twoFactorExpiresAt DateTime?
+  twoFactorAttempts    Int            @default(0)
+  twoFactorLockedUntil DateTime?
+  resetTokenHash       String?
+  resetTokenExpiresAt  DateTime?
   applications       Application[]
   notes              Note[]
   notifications      Notification[]
@@ -80,6 +84,7 @@ model Document {
   id                 String      @id @default(uuid())
   applicationId      String
   application        Application @relation(fields: [applicationId], references: [id])
+  tenantId           String?
   type               String
   filename           String
   storagePath        String
@@ -90,6 +95,23 @@ model Document {
   uploadedAt         DateTime    @default(now())
 
   @@index([applicationId])
+  @@index([tenantId])
+}
+
+model ConsentLog {
+  id             String    @id @default(uuid())
+  userId         String
+  tenantId       String
+  purpose        String
+  policyVersion  String
+  consentText    String
+  ipAddress      String?
+  userAgent      String?
+  grantedAt      DateTime  @default(now())
+  revokedAt      DateTime?
+
+  @@index([userId])
+  @@index([tenantId])
 }
 
 model MissingDoc {
@@ -99,9 +121,11 @@ model MissingDoc {
   type          String
   description   String?
   status        String      @default("PENDING") // PENDING, UPLOADED
+  tenantId      String?
   createdAt     DateTime    @default(now())
 
   @@index([applicationId])
+  @@index([tenantId])
 }
 
 model Template {
@@ -145,10 +169,12 @@ model FillHistory {
   filledByName   String
   completionPct  Int
   missingFields  Json         // string[]
+  tenantId       String?
   createdAt      DateTime     @default(now())
 
   @@index([applicationId])
   @@index([formTemplateId])
+  @@index([tenantId])
 }
 
 model Subscription {
@@ -176,9 +202,11 @@ model Note {
   authorId      String
   author        User        @relation(fields: [authorId], references: [id])
   content       String
+  tenantId      String?
   createdAt     DateTime    @default(now())
 
   @@index([applicationId])
+  @@index([tenantId])
 }
 
 model Notification {
@@ -192,9 +220,11 @@ model Notification {
   body          String
   bodyAr        String
   isRead        Boolean  @default(false)
+  tenantId      String?
   createdAt     DateTime @default(now())
 
   @@index([userId])
+  @@index([tenantId])
 }
 
 model AuditLog {
@@ -207,9 +237,11 @@ model AuditLog {
   fromStatus    String?
   toStatus      String?
   metadata      Json?
+  tenantId      String?
   createdAt     DateTime    @default(now())
 
   @@index([applicationId])
+  @@index([tenantId])
 }
 
 enum Role {

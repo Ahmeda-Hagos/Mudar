@@ -16,6 +16,9 @@ import { TemplatesModule } from './modules/templates/templates.module';
 import { FormTemplatesModule } from './modules/form-templates/form-templates.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
+import { RolesGuard } from './common/guards/roles.guard';
+import { TenantAccessGuard } from './common/guards/tenant-access.guard';
+
 /**
  * AppModule — Root module.
  *
@@ -72,6 +75,14 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: TenantAccessGuard,
     },
   ],
 })

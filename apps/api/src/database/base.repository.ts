@@ -26,19 +26,21 @@ export abstract class BaseRepository<T, CreateDto, UpdateDto> {
   }
 
   /**
-   * Find a single record by dynamic criteria, scoped by tenant.
+   * Find a single record by dynamic criteria, scoped by tenant using RLS.
    */
   async findOne(tenantId: string, where: Record<string, any>): Promise<T | null> {
-    return this.modelDelegate.findFirst({
-      where: {
-        ...where,
-        tenantId,
-      },
-    });
+    return this.prisma.$withTenant(tenantId, (tx) =>
+      tx[this.modelName].findFirst({
+        where: {
+          ...where,
+          tenantId,
+        },
+      })
+    );
   }
 
   /**
-   * Find all records scoped by tenant with basic pagination.
+   * Find all records scoped by tenant with basic pagination using RLS.
    */
   async findAll(
     tenantId: string,
@@ -50,63 +52,86 @@ export abstract class BaseRepository<T, CreateDto, UpdateDto> {
     } = {},
   ): Promise<T[]> {
     const { skip, take, where, orderBy } = params;
-    return this.modelDelegate.findMany({
-      skip,
-      take,
-      where: {
-        ...where,
-        tenantId,
-      },
-      orderBy,
-    });
+    return this.prisma.$withTenant(tenantId, (tx) =>
+      tx[this.modelName].findMany({
+        skip,
+        take,
+        where: {
+          ...where,
+          tenantId,
+        },
+        orderBy,
+      })
+    );
   }
 
   /**
-   * Count total items matching criteria, scoped by tenant.
+   * Count total records for the given criteria using RLS.
    */
   async count(tenantId: string, where: Record<string, any> = {}): Promise<number> {
-    return this.modelDelegate.count({
-      where: {
-        ...where,
-        tenantId,
-      },
-    });
+    return this.prisma.$withTenant(tenantId, (tx) =>
+      tx[this.modelName].count({
+        where: {
+          ...where,
+          tenantId,
+        },
+      })
+    );
   }
 
   /**
-   * Create a new record scoped by tenant.
+   * Create a new record bound to a specific tenant using RLS.
    */
   async create(tenantId: string, data: CreateDto): Promise<T> {
-    return this.modelDelegate.create({
-      data: {
-        ...data,
-        tenantId,
-      },
-    });
+    return this.prisma.$withTenant(tenantId, (tx) =>
+      tx[this.modelName].create({
+        data: {
+          ...data,
+          tenantId,
+        },
+      })
+    );
   }
 
   /**
-   * Update a record scoped by tenant.
+   * Update an existing record.
+   * Safety check ensures the record belongs to the tenant.
    */
   async update(tenantId: string, id: string, data: UpdateDto): Promise<T> {
-    // Assert tenant ownership first
-    await this.verifyOwnership(tenantId, id);
+    return this.prisma.$withTenant(tenantId, async (tx) => {
+      // Find first ensures we don't update another tenant's item
+      const existing = await tx[this.modelName].findFirst({
+        where: { id, tenantId },
+      });
+      
+      if (!existing) {
+        throw new Error(`Record ${id} not found in tenant ${tenantId}`);
+      }
 
-    return this.modelDelegate.update({
-      where: { id },
-      data,
+      return tx[this.modelName].update({
+        where: { id },
+        data,
+      });
     });
   }
 
   /**
-   * Delete a record scoped by tenant.
+   * Remove a record.
+   * Safety check ensures it belongs to the tenant.
    */
-  async delete(tenantId: string, id: string): Promise<T> {
-    // Assert tenant ownership first
-    await this.verifyOwnership(tenantId, id);
+  async remove(tenantId: string, id: string): Promise<T> {
+    return this.prisma.$withTenant(tenantId, async (tx) => {
+      const existing = await tx[this.modelName].findFirst({
+        where: { id, tenantId },
+      });
+      
+      if (!existing) {
+        throw new Error(`Record ${id} not found in tenant ${tenantId}`);
+      }
 
-    return this.modelDelegate.delete({
-      where: { id },
+      return tx[this.modelName].delete({
+        where: { id },
+      });
     });
   }
 

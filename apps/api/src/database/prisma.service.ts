@@ -39,9 +39,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    * using database-level Row-Level Security (RLS).
    */
   async $withTenant<T>(tenantId: string, run: (tx: any) => Promise<T>): Promise<T> {
+    // Validate UUID to prevent basic injection attempts
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(tenantId)) {
+      throw new Error('Invalid tenantId format');
+    }
+
     return this.$transaction(async (tx) => {
       // Set the session context parameter before executing the query block
-      await tx.$executeRawUnsafe(`SET LOCAL app.current_tenant_id = '${tenantId}';`);
+      // using parameterized queries to prevent SQL injection
+      await tx.$executeRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`;
       return run(tx);
     });
   }

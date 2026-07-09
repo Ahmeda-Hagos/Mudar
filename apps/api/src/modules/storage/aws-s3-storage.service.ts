@@ -53,12 +53,20 @@ export class AwsS3StorageService implements IStorageService {
 
     if (this.s3) {
       try {
-        const command = new PutObjectCommand({
+        const kmsKeyId = this.configService.get<string>('app.awsKmsKeyId');
+        const commandParams: any = {
           Bucket: this.bucketName,
           Key: storagePath,
           Body: fileBuffer,
           ContentType: mimeType,
-        });
+        };
+
+        if (kmsKeyId) {
+          commandParams.ServerSideEncryption = 'aws:kms';
+          commandParams.SSEKMSKeyId = kmsKeyId;
+        }
+
+        const command = new PutObjectCommand(commandParams);
         await this.s3.send(command);
       } catch (err: any) {
         this.logger.error(`AWS S3 upload error: ${err.message}`);

@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { IAuthService, IAuthServiceToken } from './auth.service.interface';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
@@ -12,6 +13,7 @@ export class AuthController {
     private readonly authService: IAuthService,
   ) {}
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate user and return JWT tokens or request 2FA challenge' })
@@ -21,6 +23,7 @@ export class AuthController {
     return this.authService.login(loginDto.email, loginDto.password);
   }
 
+  @Public()
   @Post('verify-2fa')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify 2FA code to complete authentications' })
@@ -38,6 +41,7 @@ export class AuthController {
     return req.user;
   }
 
+  @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset token link' })
@@ -46,14 +50,16 @@ export class AuthController {
     return { sent: true };
   }
 
+  @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Confirm password reset using token credentials' })
-  async resetPassword(@Body() body: { token: string; password: any }) {
-    await (this.authService as any).confirmPasswordReset(body.token, body.password);
+  async resetPassword(@Body() body: { token: string; password: any; email: string }) {
+    await (this.authService as any).confirmPasswordReset(body.token, body.password, body.email);
     return { success: true };
   }
 
+  @Public()
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify applicant email registration token' })

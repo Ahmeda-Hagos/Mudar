@@ -11,7 +11,7 @@ export class OcrService {
 
   constructor(private readonly configService: ConfigService) {
     const projectId = this.configService.get<string>('GOOGLE_CLOUD_PROJECT_ID');
-    const location = this.configService.get<string>('GOOGLE_CLOUD_LOCATION') || 'us';
+    const location = this.configService.get<string>('GOOGLE_CLOUD_LOCATION') || 'eu';
     const processorId = this.configService.get<string>('GOOGLE_CLOUD_PROCESSOR_ID');
 
     if (projectId && processorId) {
@@ -19,7 +19,7 @@ export class OcrService {
       this.processorName = `projects/${projectId}/locations/${location}/processors/${processorId}`;
       this.logger.log(`Initialized Document AI client targeting processor: ${processorId}`);
     } else {
-      this.logger.warn('Google Cloud Document AI credentials not fully configured. Running in sandbox mock fallback mode.');
+      this.logger.error('Google Cloud Document AI credentials missing. OCR processing will fail.');
     }
   }
 
@@ -27,25 +27,8 @@ export class OcrService {
     this.logger.log(`Processing passport document parser request: ${fileBuffer.length} bytes`);
 
     if (!this.client || !this.processorName) {
-      this.logger.warn('Using mock passport parser fallback details.');
-      return {
-        fullName: 'ALI MANSOUR AL-ZAHRANI',
-        passportNo: 'A2849104',
-        nationality: 'SAUDI ARABIA',
-        gender: 'MALE',
-        dob: '1990-05-12',
-        issueDate: '2022-04-10',
-        expiryDate: '2032-04-09',
-        confidence: {
-          fullName: 99,
-          passportNo: 98,
-          nationality: 97,
-          gender: 99,
-          dob: 95,
-          issueDate: 92,
-          expiryDate: 98,
-        },
-      };
+      this.logger.error('OCR client not configured.');
+      throw new Error('OCR client not configured. Cannot process document.');
     }
 
     try {

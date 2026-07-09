@@ -5,6 +5,8 @@ import { PrismaService } from '../../database/prisma.service';
 import { IAuthService } from './auth.service.interface';
 import { AuthUser, UserRole } from '@visaflow/types';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { authenticator } from 'otplib';
 
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -99,14 +101,25 @@ export class SupabaseAuthService implements IAuthService {
       throw new UnauthorizedException('Verification code has expired');
     }
 
-    if (user.twoFactorCode !== code) {
+    if (user.twoFactorLockedUntil && new Date() < user.twoFactorLockedUntil) {
+      throw new UnauthorizedException('Account locked due to too many failed 2FA attempts. Try again later.');
+    }
+
+    const isMatch = await bcrypt.compare(code, user.twoFactorCode);
+    if (!isMatch) {
+      const attempts = (user.twoFactorAttempts || 0) + 1;
+      const lockedUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorAttempts: attempts, twoFactorLockedUntil: lockedUntil },
+      });
       throw new UnauthorizedException('Incorrect verification code');
     }
 
-    // Clear 2FA code from database
+    // Clear 2FA code from database and reset attempts
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { twoFactorCode: null, twoFactorExpiresAt: null },
+      data: { twoFactorCode: null, twoFactorExpiresAt: null, twoFactorAttempts: 0, twoFactorLockedUntil: null },
     });
 
     // Generate final session tokens
@@ -117,13 +130,19 @@ export class SupabaseAuthService implements IAuthService {
       tenantId: user.tenantId,
     };
 
+    const jwtSecret = this.configService.get<string>('app.jwtSecret');
+    const jwtRefreshSecret = this.configService.get<string>('app.jwtRefreshSecret');
+    if (!jwtSecret || !jwtRefreshSecret || jwtSecret === 'fallback-secret') {
+      throw new Error('JWT secrets are not properly configured.');
+    }
+
     const accessToken = await this.jwtService.signAsync(sessionPayload, {
-      secret: this.configService.get<string>('app.jwtSecret') || 'fallback-secret',
+      secret: jwtSecret,
       expiresIn: '15m',
     });
 
     const refreshToken = await this.jwtService.signAsync(sessionPayload, {
-      secret: this.configService.get<string>('app.jwtRefreshSecret') || 'fallback-refresh',
+      secret: jwtRefreshSecret,
       expiresIn: '7d',
     });
 
@@ -169,12 +188,19 @@ export class SupabaseAuthService implements IAuthService {
   }
 
   async requestPasswordReset(email: string): Promise<void> {
-    this.logger.log(`Mock request password reset token for: ${email}`);
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new BadRequestException('User does not exist');
+    if (!user) return; // Prevent user enumeration
 
-    const resetToken = 'RST-' + Math.floor(100000 + Math.random() * 900000);
-    const resetLink = `https://visaflow.ai/reset-password?token=${resetToken}`;
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const resetTokenExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { resetTokenHash, resetTokenExpiresAt },
+    });
+
+    const resetLink = `https://visaflow.ai/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
     const emailHtml = `
       <div style="font-family: sans-serif; padding: 20px; color: #333;">
         <h2 style="color: #5b6ad0;">إعادة تعيين كلمة المرور | Password Reset Request</h2>
@@ -190,13 +216,26 @@ export class SupabaseAuthService implements IAuthService {
     await this.notificationsService.sendEmail(email, 'إعادة تعيين كلمة المرور | Password Reset Request', emailHtml);
   }
 
-  async confirmPasswordReset(token: string, newPassword: string): Promise<void> {
-    this.logger.log(`Mock confirm password reset token authentication: ${token}`);
-    const mockEmail = 'admin@agency.com';
+  async confirmPasswordReset(token: string, newPassword: string, email?: string): Promise<void> {
+    if (!email) throw new BadRequestException('Email is required');
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || !user.resetTokenHash || !user.resetTokenExpiresAt) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (new Date() > user.resetTokenExpiresAt) {
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    const providedTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    if (providedTokenHash !== user.resetTokenHash) {
+      throw new BadRequestException('Invalid reset token');
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({
-      where: { email: mockEmail },
-      data: { password: hashedPassword }
+      where: { id: user.id },
+      data: { password: hashedPassword, resetTokenHash: null, resetTokenExpiresAt: null }
     });
   }
 
@@ -206,10 +245,16 @@ export class SupabaseAuthService implements IAuthService {
   }
 
   async setupMockMfa(userId: string): Promise<{ secret: string; qrCodeUrl: string }> {
-    this.logger.log(`Setting up mock MFA for user: ${userId}`);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const secret = authenticator.generateSecret();
+    const qrCodeUrl = authenticator.keyuri(user.email, 'VisaFlow AI', secret);
+    
+    // Note: The secret should be saved to the database upon user verification of the code
     return {
-      secret: 'MOCK_MFA_SECRET_749219',
-      qrCodeUrl: 'https://mock-qr.visaflow.ai/mfa-qr.png',
+      secret,
+      qrCodeUrl,
     };
   }
 }

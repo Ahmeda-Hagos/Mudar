@@ -14,27 +14,43 @@ export class TenantAccessGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
+    if (!user) {
+      throw new ForbiddenException('User authentication required');
+    }
+
     // Platform level Super Admins bypass tenant isolation checks
-    if (user && user.role === UserRole.SUPER_ADMIN) {
+    if (user.role === UserRole.SUPER_ADMIN) {
       return true;
     }
 
     const headerTenantId = request.headers['x-tenant-id'];
-    const userTenantId = user?.tenantId;
+    const userTenantId = user.tenantId;
 
     if (!userTenantId) {
       this.logger.warn('Access denied: Authentication context is missing tenant assignment.');
       throw new ForbiddenException('Tenant authorization scope context is missing');
     }
 
-    // Assert request context matches user tenant scope
+    // Treat header purely as a consistency check if provided
     if (headerTenantId && headerTenantId !== userTenantId) {
       this.logger.warn(`Tenant access violation: User belonging to ${userTenantId} attempted to access x-tenant-id: ${headerTenantId}`);
       throw new ForbiddenException('Access denied: Unauthorized tenant target context');
     }
+
+    // Attach the true tenant ID to the request object so controllers don't rely on the header
+    request.tenantId = userTenantId;
 
     return true;
   }

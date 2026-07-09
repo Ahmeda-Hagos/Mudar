@@ -1,4 +1,4 @@
-import { Controller, Post, UseInterceptors, UploadedFile, UseGuards, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, UseGuards, Body, BadRequestException, Param, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
@@ -38,6 +38,15 @@ export class DocumentsController {
       throw new BadRequestException('File buffer is required');
     }
 
+    // Verify application belongs to the caller's tenant
+    const application = await this.prisma.application.findFirst({
+      where: { id: applicationId, tenantId }
+    });
+    
+    if (!application) {
+      throw new BadRequestException(`Invalid application ID for tenant ${tenantId}`);
+    }
+
     // 1. Upload to Supabase Storage Bucket using path
     const { storagePath, publicUrl } = await this.storageService.uploadFile(
       tenantId,
@@ -57,6 +66,7 @@ export class DocumentsController {
     const document = await this.prisma.document.create({
       data: {
         applicationId,
+        tenantId, // Add tenant isolation
         type,
         filename: file.originalname,
         storagePath,
@@ -87,17 +97,64 @@ export class DocumentsController {
   @ApiOperation({ summary: 'Generate secure pre-signed download URL (expires in 60 seconds)' })
   async getPresignedUrl(
     @TenantId() tenantId: string,
-    @Body('documentId') documentId: string,
+    @Param('id') documentId: string,
   ) {
-    const document = await this.prisma.document.findUnique({
-      where: { id: documentId },
+    const document = await this.prisma.document.findFirst({
+      where: { id: documentId, tenantId },
     });
 
     if (!document) {
-      throw new BadRequestException('Document reference not found');
+      throw new BadRequestException('Document not found');
     }
 
     const url = await this.storageService.getPresignedUrl(tenantId, document.storagePath, 60);
+
     return { url };
+  }
+
+  @Post('consent')
+  @ApiOperation({ summary: 'Submit granular consent for data processing' })
+  async submitConsent(
+    @TenantId() tenantId: string,
+    @Request() req: any,
+    @Body('purpose') purpose: string,
+    @Body('policyVersion') policyVersion: string,
+    @Body('consentText') consentText: string,
+  ) {
+    const consent = await this.prisma.consentLog.create({
+      data: {
+        userId: req.user.id,
+        tenantId,
+        purpose,
+        policyVersion,
+        consentText,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      }
+    });
+    return { success: true, consentId: consent.id };
+  }
+
+  @Post('consent/withdraw')
+  @ApiOperation({ summary: 'Withdraw granular consent for data processing' })
+  async withdrawConsent(
+    @TenantId() tenantId: string,
+    @Request() req: any,
+    @Body('consentId') consentId: string,
+  ) {
+    const consent = await this.prisma.consentLog.findFirst({
+      where: { id: consentId, userId: req.user.id, tenantId }
+    });
+
+    if (!consent) {
+      throw new BadRequestException('Consent record not found');
+    }
+
+    await this.prisma.consentLog.update({
+      where: { id: consent.id },
+      data: { revokedAt: new Date() }
+    });
+    
+    return { success: true };
   }
 }
