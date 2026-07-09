@@ -1,13 +1,23 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, ForbiddenException } from '@nestjs/common';
 
 /**
- * Parameter decorator to extract the tenant ID context from request headers
- * injected by Multi-tenant gateway middleware.
+ * Parameter decorator that extracts the verified tenant ID from the request.
+ *
+ * TenantAccessGuard sets request.tenantId from the JWT claim before any
+ * controller runs. This decorator reads that trusted value — never the
+ * raw x-tenant-id header — so tenant scope cannot be spoofed by a client.
  */
 export const TenantId = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): string => {
     const request = ctx.switchToHttp().getRequest();
-    const tenantId = request.headers['x-tenant-id'] || request.user?.tenantId;
+
+    // request.tenantId is set by TenantAccessGuard from the verified JWT payload
+    const tenantId: string | undefined = request.tenantId;
+
+    if (!tenantId) {
+      throw new ForbiddenException('Tenant context missing from request. Ensure TenantAccessGuard is active.');
+    }
+
     return tenantId;
   },
 );

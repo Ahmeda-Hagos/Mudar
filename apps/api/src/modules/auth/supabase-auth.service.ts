@@ -41,9 +41,12 @@ export class SupabaseAuthService implements IAuthService {
     const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
     const twoFactorExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
+    // Hash before storing — verify2FaCode uses bcrypt.compare() against the raw user-supplied code
+    const twoFactorCodeHash = await bcrypt.hash(twoFactorCode, 10);
+
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { twoFactorCode, twoFactorExpiresAt },
+      data: { twoFactorCode: twoFactorCodeHash, twoFactorExpiresAt },
     });
 
     // Send 2FA email
@@ -240,8 +243,67 @@ export class SupabaseAuthService implements IAuthService {
   }
 
   async verifyEmailToken(token: string): Promise<boolean> {
-    this.logger.log(`Verifying email token: ${token}`);
+    if (!token) throw new BadRequestException('Verification token is required');
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await this.prisma.user.findFirst({
+      where: { emailVerificationToken: tokenHash },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or already-used verification token');
+    }
+
+    if (user.emailVerificationExpiresAt && new Date() > user.emailVerificationExpiresAt) {
+      throw new BadRequestException('Verification token has expired — please request a new one');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+      },
+    });
+
     return true;
+  }
+
+  /**
+   * Generates and sends an email verification link for the given user.
+   * Call this after user registration or when the user requests a resend.
+   */
+  async sendEmailVerification(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return;
+    if (user.emailVerified) return; // Already verified — no-op
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerificationToken: tokenHash,
+        emailVerificationExpiresAt: expiresAt,
+      },
+    });
+
+    const verifyLink = `https://visaflow.ai/verify-email?token=${rawToken}`;
+    const emailHtml = `
+      <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2 style="color: #5b6ad0;">تأكيد البريد الإلكتروني | Verify Your Email</h2>
+        <p>يرجى النقر على الرابط أدناه لتأكيد بريدك الإلكتروني (صالح لمدة 24 ساعة):</p>
+        <p><a href="${verifyLink}" style="color: #5b6ad0; font-weight: bold;">Verify Email | تأكيد البريد</a></p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <small style="color: #999;">VisaFlow AI — If you did not create an account, ignore this email.</small>
+      </div>
+    `;
+
+    await this.notificationsService.sendEmail(user.email, 'تأكيد البريد الإلكتروني | Verify Email', emailHtml);
   }
 
   async setupMockMfa(userId: string): Promise<{ secret: string; qrCodeUrl: string }> {

@@ -16,6 +16,7 @@ import { TemplatesModule } from './modules/templates/templates.module';
 import { FormTemplatesModule } from './modules/form-templates/form-templates.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TenantAccessGuard } from './common/guards/tenant-access.guard';
 
@@ -72,9 +73,18 @@ import { TenantAccessGuard } from './common/guards/tenant-access.guard';
     }]),
   ],
   providers: [
+    // Guard order matters — NestJS executes APP_GUARD providers in registration order.
+    // 1. ThrottlerGuard  — rate limiting (no auth dependency)
+    // 2. JwtAuthGuard    — validates JWT and populates request.user
+    // 3. RolesGuard      — checks roles (needs request.user)
+    // 4. TenantAccessGuard — validates tenant scope (needs request.user)
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,

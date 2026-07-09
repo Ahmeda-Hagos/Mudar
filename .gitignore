@@ -32,5 +32,4 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Prisma Generated Client (Optional since it is in node_modules, but keep clean)
-/apps/api/prisma/migrations/
+# Prisma Generated Client is inside node_modules — migration SQL files must be committed

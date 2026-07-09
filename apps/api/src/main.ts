@@ -7,9 +7,6 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { StructuredLogger } from './common/logger/structured.logger';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { Reflector } from '@nestjs/core';
-import { TenantAccessGuard } from './common/guards/tenant-access.guard';
-import { RolesGuard } from './common/guards/roles.guard';
 
 /**
  * Bootstrap — NestJS application entrypoint.
@@ -53,13 +50,6 @@ async function bootstrap() {
 
   // ── Global Exception Filter ─────────────────────────────────────────────────
   app.useGlobalFilters(new GlobalExceptionFilter());
-
-  // ── Global Security Guards ──────────────────────────────────────────────────
-  const reflector = app.get(Reflector);
-  app.useGlobalGuards(
-    new TenantAccessGuard(reflector),
-    new RolesGuard(reflector),
-  );
 
   // ── Global Validation Pipe ──────────────────────────────────────────────────
   app.useGlobalPipes(

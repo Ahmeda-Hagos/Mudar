@@ -11,6 +11,7 @@ export class AwsS3StorageService implements IStorageService {
   private s3: S3Client | null = null;
   private bucketName: string;
   private region: string;
+  private kmsKeyId: string | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -20,8 +21,15 @@ export class AwsS3StorageService implements IStorageService {
     const accessKeyId = this.configService.get<string>('app.awsAccessKeyId');
     const secretAccessKey = this.configService.get<string>('app.awsSecretAccessKey');
     this.bucketName = this.configService.get<string>('app.awsS3Bucket') || 'visaflow-sensitive-vault';
+    this.kmsKeyId = this.configService.get<string>('app.awsKmsKeyId') || null;
 
     if (accessKeyId && secretAccessKey) {
+      if (!this.kmsKeyId) {
+        throw new Error(
+          'AWS_KMS_KEY_ID is required. All S3 uploads must use SSE-KMS encryption. ' +
+          'Configure a Customer Managed Key ARN in the environment before starting the service.'
+        );
+      }
       this.s3 = new S3Client({
         region: this.region,
         credentials: {
@@ -29,7 +37,7 @@ export class AwsS3StorageService implements IStorageService {
           secretAccessKey,
         },
       });
-      this.logger.log(`AWS S3 Client initialized in region ${this.region} successfully.`);
+      this.logger.log(`AWS S3 Client initialized in region ${this.region} with KMS key ${this.kmsKeyId}.`);
     } else {
       this.logger.warn('AWS S3 credentials missing. Running storage in mock/sandbox mode.');
     }
@@ -53,20 +61,14 @@ export class AwsS3StorageService implements IStorageService {
 
     if (this.s3) {
       try {
-        const kmsKeyId = this.configService.get<string>('app.awsKmsKeyId');
-        const commandParams: any = {
+        const command = new PutObjectCommand({
           Bucket: this.bucketName,
           Key: storagePath,
           Body: fileBuffer,
           ContentType: mimeType,
-        };
-
-        if (kmsKeyId) {
-          commandParams.ServerSideEncryption = 'aws:kms';
-          commandParams.SSEKMSKeyId = kmsKeyId;
-        }
-
-        const command = new PutObjectCommand(commandParams);
+          ServerSideEncryption: 'aws:kms',  // Always required — constructor throws if kmsKeyId is absent
+          SSEKMSKeyId: this.kmsKeyId!,
+        });
         await this.s3.send(command);
       } catch (err: any) {
         this.logger.error(`AWS S3 upload error: ${err.message}`);
