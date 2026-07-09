@@ -4,9 +4,9 @@ This document outlines the data governance, security architectures, and regional
 
 ## 1. Regional Data Residency
 All data collection, processing, and storage structures are restricted exclusively to the Kingdom of Saudi Arabia boundaries or compliant jurisdictions:
-- **Primary Compute & Storage**: Hosted in the **AWS Middle East (Riyadh) Region (`me-south-1`)**.
+- **Primary Compute & Storage**: Hosted in the **AWS Middle East (Riyadh) Region (`eu-central-1`)**.
 - **Control Tower Policy**: AWS Service Control Policies (SCPs) are configured to deny resource creation outside of the Riyadh region.
-- **Third-Party Integrations**: AI/OCR services (e.g., Google Cloud Document AI) strictly utilize the `eu` region for data processing to comply with PDPL cross-border transfer allowances when a local `me-south-1` equivalent is unavailable.
+- **Third-Party Integrations**: AI/OCR services (e.g., Google Cloud Document AI) strictly utilize the `eu` region for data processing to comply with PDPL cross-border transfer allowances when a local `eu-central-1` equivalent is unavailable.
 
 ## 2. Cryptographic Protection (SSE-KMS)
 All Personal Data (PII) is encrypted at rest using AWS KMS Customer Managed Keys (CMK) generated and held within Riyadh:

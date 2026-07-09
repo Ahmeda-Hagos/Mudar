@@ -7,7 +7,7 @@ on:
     branches: [ main, master, develop ]
 
 env:
-  AWS_REGION: "me-south-1"
+  AWS_REGION: "eu-central-1"
 
 jobs:
   build-and-test:

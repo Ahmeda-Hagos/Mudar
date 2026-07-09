@@ -17,7 +17,7 @@ export class AwsS3StorageService implements IStorageService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    this.region = this.configService.get<string>('app.awsRegion') || 'me-south-1';
+    this.region = this.configService.get<string>('app.awsRegion') || 'eu-central-1';
     const accessKeyId = this.configService.get<string>('app.awsAccessKeyId');
     const secretAccessKey = this.configService.get<string>('app.awsSecretAccessKey');
     this.bucketName = this.configService.get<string>('app.awsS3Bucket') || 'visaflow-sensitive-vault';
@@ -66,7 +66,7 @@ export class AwsS3StorageService implements IStorageService {
           Key: storagePath,
           Body: fileBuffer,
           ContentType: mimeType,
-          ServerSideEncryption: 'aws:kms',  // Always required â€” constructor throws if kmsKeyId is absent
+          ServerSideEncryption: 'aws:kms',  // Always required Ã¢â‚¬â€ constructor throws if kmsKeyId is absent
           SSEKMSKeyId: this.kmsKeyId!,
         });
         await this.s3.send(command);
