@@ -17,7 +17,7 @@ export class AwsS3StorageService implements IStorageService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    this.region = this.configService.get<string>('app.awsRegion') || 'me-central-1';
+    this.region = this.configService.get<string>('app.awsRegion') || 'me-central-2';
     const accessKeyId = this.configService.get<string>('app.awsAccessKeyId');
     const secretAccessKey = this.configService.get<string>('app.awsSecretAccessKey');
     this.bucketName = this.configService.get<string>('app.awsS3Bucket') || 'visaflow-sensitive-vault';

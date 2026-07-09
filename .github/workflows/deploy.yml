@@ -6,14 +6,15 @@ on:
   pull_request:
     branches: [ main, master, develop ]
 
+env:
+  AWS_REGION: "me-central-2"
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
-
+        node-version: [22.x]
     steps:
     - name: Checkout Code Repository
       uses: actions/checkout@v4
@@ -49,3 +50,74 @@ jobs:
       run: npm run build:web
       env:
         DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init (Staging)
+      run: terraform init
+      working-directory: ./terraform/environments/staging
+
+    - name: Terraform Apply (Staging)
+      run: terraform apply -auto-approve
+      working-directory: ./terraform/environments/staging
+      env:
+        TF_VAR_db_password: ${{ secrets.TF_VAR_db_password }}
+        TF_VAR_jwt_secret: ${{ secrets.TF_VAR_jwt_secret }}
+        TF_VAR_kms_key_arn: ${{ secrets.TF_VAR_kms_key_arn }}
+
+    # Note: ECS Fargate Migration Task triggering would go here.
+    # e.g. aws ecs run-task --cluster visaflow-cluster-staging --task-definition visaflow-migration-staging --launch-type FARGATE ...
+
+  deploy-production:
+    name: Deploy to Production
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      # This enables the required-reviewer gate (configured in GitHub UI)
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init (Production)
+      run: terraform init
+      working-directory: ./terraform/environments/production
+
+    - name: Terraform Apply (Production)
+      run: terraform apply -auto-approve
+      working-directory: ./terraform/environments/production
+      env:
+        TF_VAR_db_password: ${{ secrets.TF_VAR_db_password }}
+        TF_VAR_jwt_secret: ${{ secrets.TF_VAR_jwt_secret }}
+        TF_VAR_kms_key_arn: ${{ secrets.TF_VAR_kms_key_arn }}
+
+    # Note: ECS Fargate Migration Task triggering would go here.
