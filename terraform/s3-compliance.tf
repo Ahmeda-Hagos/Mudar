@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "me-central-2"
+  region = "me-south-1"
 }
 
 # KMS Key for S3 Encryption

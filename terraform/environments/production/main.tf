@@ -9,12 +9,12 @@ terraform {
   # backend "s3" {
   #   bucket = "visaflow-terraform-state"
   #   key    = "production/terraform.tfstate"
-  #   region = "me-central-2"
+  #   region = "me-south-1"
   # }
 }
 
 provider "aws" {
-  region = "me-central-2"
+  region = "me-south-1"
 }
 
 variable "db_password" {
@@ -35,7 +35,7 @@ module "rds" {
   source = "../../modules/rds"
 
   environment       = "production"
-  region            = "me-central-2"
+  region            = "me-south-1"
   multi_az          = true # Production uses Multi-AZ for high availability
   db_instance_class = "db.t3.medium" # Slightly larger for prod
   db_password       = var.db_password

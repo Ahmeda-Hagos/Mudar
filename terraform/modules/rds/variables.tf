@@ -6,7 +6,7 @@ variable "environment" {
 variable "region" {
   type        = string
   description = "AWS Region"
-  default     = "me-central-2"
+  default     = "me-south-1"
 }
 
 variable "kms_key_arn" {

@@ -9,12 +9,12 @@ terraform {
   # backend "s3" {
   #   bucket = "visaflow-terraform-state"
   #   key    = "staging/terraform.tfstate"
-  #   region = "me-central-2"
+  #   region = "me-south-1"
   # }
 }
 
 provider "aws" {
-  region = "me-central-2"
+  region = "me-south-1"
 }
 
 variable "db_password" {
@@ -35,7 +35,7 @@ module "rds" {
   source = "../../modules/rds"
 
   environment       = "staging"
-  region            = "me-central-2"
+  region            = "me-south-1"
   multi_az          = false # Staging uses Single-AZ to save costs
   db_instance_class = "db.t3.micro"
   db_password       = var.db_password
