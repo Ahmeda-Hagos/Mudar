@@ -116,10 +116,10 @@ export abstract class BaseRepository<T, CreateDto, UpdateDto> {
   }
 
   /**
-   * Remove a record.
+   * Delete a record.
    * Safety check ensures it belongs to the tenant.
    */
-  async remove(tenantId: string, id: string): Promise<T> {
+  async delete(tenantId: string, id: string): Promise<T> {
     return this.prisma.$withTenant(tenantId, async (tx) => {
       const existing = await tx[this.modelName].findFirst({
         where: { id, tenantId },

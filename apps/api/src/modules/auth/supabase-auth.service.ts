@@ -6,7 +6,7 @@ import { IAuthService } from './auth.service.interface';
 import { AuthUser, UserRole } from '@visaflow/types';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { authenticator } from 'otplib';
+import * as speakeasy from 'speakeasy';
 
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -248,8 +248,9 @@ export class SupabaseAuthService implements IAuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('User not found');
 
-    const secret = authenticator.generateSecret();
-    const qrCodeUrl = authenticator.keyuri(user.email, 'VisaFlow AI', secret);
+    const secretObj = speakeasy.generateSecret({ name: 'VisaFlow AI', issuer: 'VisaFlow' });
+    const secret = secretObj.base32;
+    const qrCodeUrl = secretObj.otpauth_url || '';
     
     // Note: The secret should be saved to the database upon user verification of the code
     return {
