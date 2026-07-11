@@ -15,6 +15,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { FormTemplatesModule } from './modules/form-templates/form-templates.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { HealthModule } from './modules/health/health.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -67,6 +68,7 @@ import { TenantAccessGuard } from './common/guards/tenant-access.guard';
     TemplatesModule,
     FormTemplatesModule,
     NotificationsModule,
+    HealthModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,
       limit: 100,
