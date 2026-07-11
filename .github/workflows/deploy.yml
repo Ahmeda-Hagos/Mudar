@@ -71,6 +71,10 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
+    - name: Ensure Terraform State Bucket Exists
+      run: |
+        aws s3 mb s3://visaflow-tf-burner-state-49172 --region eu-central-1 || true
+
     - name: Terraform Init (Staging)
       run: terraform init
       working-directory: ./terraform/environments/staging

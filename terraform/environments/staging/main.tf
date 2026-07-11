@@ -5,12 +5,11 @@ terraform {
       version = "~> 5.0"
     }
   }
-  # Note: For production use, uncomment and configure the S3 backend
-  # backend "s3" {
-  #   bucket = "visaflow-terraform-state"
-  #   key    = "staging/terraform.tfstate"
-  #   region = "eu-central-1"
-  # }
+  backend "s3" {
+    bucket = "visaflow-tf-burner-state-49172"
+    key    = "staging-v2/terraform.tfstate"
+    region = "eu-central-1"
+  }
 }
 
 provider "aws" {
@@ -34,7 +33,7 @@ variable "kms_key_arn" {
 module "rds" {
   source = "../../modules/rds"
 
-  environment       = "staging"
+  environment       = "staging-v2"
   region            = "eu-central-1"
   multi_az          = false # Staging uses Single-AZ to save costs
   db_instance_class = "db.t3.micro"
@@ -45,7 +44,7 @@ module "rds" {
 module "ecs" {
   source = "../../modules/ecs"
 
-  environment           = "staging"
+  environment           = "staging-v2"
   region                = "eu-central-1"
   vpc_id                = module.rds.vpc_id
   private_subnets       = module.rds.private_subnets
