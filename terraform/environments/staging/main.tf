@@ -63,3 +63,7 @@ output "staging_api_url" {
 output "staging_ecr_repository_url" {
   value = module.ecs.ecr_repository_url
 }
+
+output "staging_web_ecr_repository_url" {
+  value = module.ecs.web_ecr_repository_url
+}

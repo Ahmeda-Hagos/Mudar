@@ -101,9 +101,23 @@ jobs:
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
         docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
 
-    - name: Force ECS Service Update (Staging)
+    - name: Force ECS Service Update (Staging API)
       run: |
         aws ecs update-service --cluster visaflow-cluster-staging-v2 --service visaflow-api-service-staging-v2 --force-new-deployment
+
+    - name: Build, tag, and push WEB image to Amazon ECR (Staging)
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr-staging.outputs.registry }}
+        ECR_REPOSITORY: visaflow-web-staging-v2
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/web/Dockerfile .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
+
+    - name: Force ECS Service Update (Staging Web)
+      run: |
+        aws ecs update-service --cluster visaflow-cluster-staging-v2 --service visaflow-web-service-staging-v2 --force-new-deployment
 
     # Note: ECS Fargate Migration Task triggering would go here.
 
@@ -155,8 +169,22 @@ jobs:
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
         docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
 
-    - name: Force ECS Service Update (Production)
+    - name: Force ECS Service Update (Production API)
       run: |
         aws ecs update-service --cluster visaflow-cluster-production-v2 --service visaflow-api-service-production-v2 --force-new-deployment
+
+    - name: Build, tag, and push WEB image to Amazon ECR (Production)
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
+        ECR_REPOSITORY: visaflow-web-production-v2
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/web/Dockerfile .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
+
+    - name: Force ECS Service Update (Production Web)
+      run: |
+        aws ecs update-service --cluster visaflow-cluster-production-v2 --service visaflow-web-service-production-v2 --force-new-deployment
 
     # Note: ECS Fargate Migration Task triggering would go here.

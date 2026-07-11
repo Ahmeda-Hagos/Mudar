@@ -148,6 +148,22 @@ resource "aws_lb_target_group" "api_tg" {
   }
 }
 
+resource "aws_lb_target_group" "web_tg" {
+  name        = "visaflow-web-tg-${var.environment}"
+  port        = 3000
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
 resource "aws_lb_listener" "api_listener" {
   load_balancer_arn = aws_lb.api_alb.arn
   port              = "80"
@@ -155,7 +171,23 @@ resource "aws_lb_listener" "api_listener" {
 
   default_action {
     type             = "forward"
+    target_group_arn = aws_lb_target_group.web_tg.arn
+  }
+}
+
+resource "aws_lb_listener_rule" "api_routing" {
+  listener_arn = aws_lb_listener.api_listener.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
     target_group_arn = aws_lb_target_group.api_tg.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
   }
 }
 
@@ -164,6 +196,16 @@ resource "aws_lb_listener" "api_listener" {
 # ---------------------------------------------------------
 resource "aws_ecr_repository" "api_repo" {
   name                 = "visaflow-api-${var.environment}"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true # Allow easy teardown for this burner environment
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "web_repo" {
+  name                 = "visaflow-web-${var.environment}"
   image_tag_mutability = "MUTABLE"
   force_delete         = true # Allow easy teardown for this burner environment
 
@@ -187,6 +229,11 @@ resource "aws_cloudwatch_log_group" "api_logs" {
 
 resource "aws_cloudwatch_log_group" "migration_logs" {
   name              = "/ecs/visaflow-migration-${var.environment}"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "web_logs" {
+  name              = "/ecs/visaflow-web-${var.environment}"
   retention_in_days = 7
 }
 
@@ -228,6 +275,45 @@ resource "aws_ecs_task_definition" "api" {
           "awslogs-group"         = aws_cloudwatch_log_group.api_logs.name
           "awslogs-region"        = var.region
           "awslogs-stream-prefix" = "api"
+        }
+      }
+    }
+  ])
+}
+
+resource "aws_ecs_task_definition" "web" {
+  family                   = "visaflow-web-${var.environment}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 256
+  memory                   = 512
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+
+  lifecycle {
+    ignore_changes = [container_definitions]
+  }
+
+  container_definitions = jsonencode([
+    {
+      name      = "web"
+      image     = "${aws_ecr_repository.web_repo.repository_url}:latest"
+      essential = true
+      portMappings = [{
+        containerPort = 3000
+        hostPort      = 3000
+        protocol      = "tcp"
+      }]
+      environment = [
+        { name = "NODE_ENV", value = "production" },
+        { name = "NEXT_PUBLIC_API_URL", value = "/api/v1" }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.web_logs.name
+          "awslogs-region"        = var.region
+          "awslogs-stream-prefix" = "web"
         }
       }
     }
@@ -279,6 +365,30 @@ resource "aws_ecs_service" "api_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.api_tg.arn
     container_name   = "api"
+    container_port   = 3000
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition] # CI/CD will update this
+  }
+}
+
+resource "aws_ecs_service" "web_service" {
+  name            = "visaflow-web-service-${var.environment}"
+  cluster         = aws_ecs_cluster.cluster.id
+  task_definition = aws_ecs_task_definition.web.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnets
+    security_groups  = [var.ecs_security_group_id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.web_tg.arn
+    container_name   = "web"
     container_port   = 3000
   }
 

@@ -63,3 +63,7 @@ output "production_api_url" {
 output "production_ecr_repository_url" {
   value = module.ecs.ecr_repository_url
 }
+
+output "production_web_ecr_repository_url" {
+  value = module.ecs.web_ecr_repository_url
+}

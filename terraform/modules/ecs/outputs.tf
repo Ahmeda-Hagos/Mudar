@@ -20,5 +20,15 @@ output "migration_task_definition_arn" {
 
 output "ecr_repository_url" {
   value       = aws_ecr_repository.api_repo.repository_url
-  description = "URL of the ECR repository"
+  description = "URL of the API ECR repository"
+}
+
+output "web_ecr_repository_url" {
+  value       = aws_ecr_repository.web_repo.repository_url
+  description = "URL of the Web ECR repository"
+}
+
+output "web_ecs_service_name" {
+  value       = aws_ecs_service.web_service.name
+  description = "The name of the Web ECS service"
 }
