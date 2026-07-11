@@ -160,6 +160,19 @@ resource "aws_lb_listener" "api_listener" {
 }
 
 # ---------------------------------------------------------
+# Elastic Container Registry (ECR)
+# ---------------------------------------------------------
+resource "aws_ecr_repository" "api_repo" {
+  name                 = "visaflow-api-${var.environment}"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true # Allow easy teardown for this burner environment
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+# ---------------------------------------------------------
 # ECS Cluster & Tasks
 # ---------------------------------------------------------
 
@@ -186,10 +199,14 @@ resource "aws_ecs_task_definition" "api" {
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
+  lifecycle {
+    ignore_changes = [container_definitions]
+  }
+
   container_definitions = jsonencode([
     {
       name      = "api"
-      image     = "nginx:latest" # Placeholder, will be replaced by CI/CD
+      image     = "${aws_ecr_repository.api_repo.repository_url}:latest"
       essential = true
       portMappings = [{
         containerPort = 3000

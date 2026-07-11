@@ -59,3 +59,7 @@ module "ecs" {
 output "production_api_url" {
   value = "http://${module.ecs.alb_dns_name}"
 }
+
+output "production_ecr_repository_url" {
+  value = module.ecs.ecr_repository_url
+}

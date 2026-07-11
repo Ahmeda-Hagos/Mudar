@@ -87,8 +87,25 @@ jobs:
         TF_VAR_jwt_secret: ${{ secrets.TF_VAR_jwt_secret }}
         TF_VAR_kms_key_arn: ${{ secrets.TF_VAR_kms_key_arn }}
 
+    - name: Login to Amazon ECR
+      id: login-ecr-staging
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR (Staging)
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr-staging.outputs.registry }}
+        ECR_REPOSITORY: visaflow-api-staging-v2
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/api/Dockerfile .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
+
+    - name: Force ECS Service Update (Staging)
+      run: |
+        aws ecs update-service --cluster visaflow-cluster-staging-v2 --service visaflow-api-service-staging-v2 --force-new-deployment
+
     # Note: ECS Fargate Migration Task triggering would go here.
-    # e.g. aws ecs run-task --cluster visaflow-cluster-staging --task-definition visaflow-migration-staging --launch-type FARGATE ...
 
   deploy-production:
     name: Deploy to Production
@@ -123,5 +140,23 @@ jobs:
         TF_VAR_db_password: ${{ secrets.TF_VAR_db_password }}
         TF_VAR_jwt_secret: ${{ secrets.TF_VAR_jwt_secret }}
         TF_VAR_kms_key_arn: ${{ secrets.TF_VAR_kms_key_arn }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr-prod
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR (Production)
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
+        ECR_REPOSITORY: visaflow-api-production-v2
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/api/Dockerfile .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
+
+    - name: Force ECS Service Update (Production)
+      run: |
+        aws ecs update-service --cluster visaflow-cluster-production-v2 --service visaflow-api-service-production-v2 --force-new-deployment
 
     # Note: ECS Fargate Migration Task triggering would go here.

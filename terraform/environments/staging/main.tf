@@ -59,3 +59,7 @@ module "ecs" {
 output "staging_api_url" {
   value = "http://${module.ecs.alb_dns_name}"
 }
+
+output "staging_ecr_repository_url" {
+  value = module.ecs.ecr_repository_url
+}

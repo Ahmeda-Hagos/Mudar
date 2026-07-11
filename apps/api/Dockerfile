@@ -1,16 +1,28 @@
-# Multi-stage production build for NestJS Backend
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-COPY apps/api/package*.json ./apps/api/
-RUN npm install
-COPY . .
-RUN npm run build --workspace=apps/api
+FROM node:22-slim
 
-FROM node:18-alpine AS runner
+# Install OpenSSL (required by Prisma)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api ./apps/api
+
+# Copy root package.json and lockfile
+COPY package.json package-lock.json ./
+
+# Copy all workspaces
+COPY apps ./apps
+COPY packages ./packages
+
+# Install all dependencies
+RUN npm ci
+
+# Generate Prisma Client
+RUN npm run prisma:generate --workspace=apps/api
+
+# Build the API
+RUN npm run build:api
+
+# Expose API port
 EXPOSE 3000
+
+# Start the application
 CMD ["npm", "run", "start:prod", "--workspace=apps/api"]

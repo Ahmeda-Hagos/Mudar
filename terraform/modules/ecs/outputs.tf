@@ -17,3 +17,8 @@ output "migration_task_definition_arn" {
   value       = aws_ecs_task_definition.migration.arn
   description = "ARN of the migration task definition"
 }
+
+output "ecr_repository_url" {
+  value       = aws_ecr_repository.api_repo.repository_url
+  description = "URL of the ECR repository"
+}
