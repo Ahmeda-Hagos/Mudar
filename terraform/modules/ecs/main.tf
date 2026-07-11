@@ -86,7 +86,7 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
       {
         Effect = "Allow"
         Action = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
-        Resource = var.kms_key_arn
+        Resource = "*"
       }
     ]
   })
