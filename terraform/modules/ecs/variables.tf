@@ -3,6 +3,11 @@ variable "environment" {
   description = "Environment name"
 }
 
+variable "region" {
+  type        = string
+  description = "AWS Region"
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID from RDS module"

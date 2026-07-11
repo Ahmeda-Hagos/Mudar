@@ -46,6 +46,7 @@ module "ecs" {
   source = "../../modules/ecs"
 
   environment           = "production"
+  region                = "eu-central-1"
   vpc_id                = module.rds.vpc_id
   private_subnets       = module.rds.private_subnets
   public_subnets        = module.rds.public_subnets
