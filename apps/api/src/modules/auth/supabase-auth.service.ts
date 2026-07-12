@@ -59,7 +59,7 @@ export class SupabaseAuthService implements IAuthService {
         </div>
         <p>الرمز صالح لمدة 5 دقائق فقط.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-        <small style="color: #999;">VisaFlow AI Security Service</small>
+        <small style="color: #999;">Mudar AI Security Service</small>
       </div>
     `;
     await this.notificationsService.sendEmail(user.email, 'رمز التحقق الثنائي | 2FA Verification Code', emailHtml);
@@ -203,7 +203,7 @@ export class SupabaseAuthService implements IAuthService {
       data: { resetTokenHash, resetTokenExpiresAt },
     });
 
-    const resetLink = `https://visaflow.ai/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+    const resetLink = `https://mudar.ai/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
     const emailHtml = `
       <div style="font-family: sans-serif; padding: 20px; color: #333;">
         <h2 style="color: #5b6ad0;">إعادة تعيين كلمة المرور | Password Reset Request</h2>
@@ -213,7 +213,7 @@ export class SupabaseAuthService implements IAuthService {
         </div>
         <p><a href="${resetLink}" style="color: #5b6ad0; font-weight: bold;">اضغط هنا لإعادة التعيين | Click here to reset</a></p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-        <small style="color: #999;">VisaFlow AI Authentication Service</small>
+        <small style="color: #999;">Mudar AI Authentication Service</small>
       </div>
     `;
     await this.notificationsService.sendEmail(email, 'إعادة تعيين كلمة المرور | Password Reset Request', emailHtml);
@@ -292,14 +292,14 @@ export class SupabaseAuthService implements IAuthService {
       },
     });
 
-    const verifyLink = `https://visaflow.ai/verify-email?token=${rawToken}`;
+    const verifyLink = `https://mudar.ai/verify-email?token=${rawToken}`;
     const emailHtml = `
       <div style="font-family: sans-serif; padding: 20px; color: #333;">
         <h2 style="color: #5b6ad0;">تأكيد البريد الإلكتروني | Verify Your Email</h2>
         <p>يرجى النقر على الرابط أدناه لتأكيد بريدك الإلكتروني (صالح لمدة 24 ساعة):</p>
         <p><a href="${verifyLink}" style="color: #5b6ad0; font-weight: bold;">Verify Email | تأكيد البريد</a></p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-        <small style="color: #999;">VisaFlow AI — If you did not create an account, ignore this email.</small>
+        <small style="color: #999;">Mudar AI — If you did not create an account, ignore this email.</small>
       </div>
     `;
 
@@ -310,7 +310,7 @@ export class SupabaseAuthService implements IAuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('User not found');
 
-    const secretObj = speakeasy.generateSecret({ name: 'VisaFlow AI', issuer: 'VisaFlow' });
+    const secretObj = speakeasy.generateSecret({ name: 'Mudar AI', issuer: 'Mudar' });
     const secret = secretObj.base32;
     const qrCodeUrl = secretObj.otpauth_url || '';
     

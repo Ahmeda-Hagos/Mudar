@@ -113,8 +113,8 @@ export default function FormStudioPage({ params }: PageProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('visaflow_token')}`,
-          'x-tenant-id': localStorage.getItem('visaflow_tenant_id') || '',
+          'Authorization': `Bearer ${localStorage.getItem('mudar_token')}`,
+          'x-tenant-id': localStorage.getItem('mudar_tenant_id') || '',
         },
         body: JSON.stringify({
           applicationId: id,

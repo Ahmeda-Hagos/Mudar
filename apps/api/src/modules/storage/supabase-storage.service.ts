@@ -17,7 +17,7 @@ export class SupabaseStorageService implements IStorageService {
   ) {
     const supabaseUrl = this.configService.get<string>('app.supabaseUrl');
     const serviceKey = this.configService.get<string>('app.supabaseServiceRoleKey');
-    this.bucketName = this.configService.get<string>('app.supabaseStorageBucket') || 'visaflow';
+    this.bucketName = this.configService.get<string>('app.supabaseStorageBucket') || 'mudar';
 
     if (supabaseUrl && serviceKey) {
       this.supabase = createClient(supabaseUrl, serviceKey, {

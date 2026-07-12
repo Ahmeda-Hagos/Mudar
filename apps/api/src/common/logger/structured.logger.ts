@@ -9,7 +9,7 @@ import { Injectable, LoggerService, ConsoleLogger } from '@nestjs/common';
 @Injectable()
 export class StructuredLogger extends ConsoleLogger implements LoggerService {
   constructor(context?: string) {
-    super(context || 'VisaFlow-API');
+    super(context || 'Mudar-API');
   }
 
   log(message: any, context?: string) {

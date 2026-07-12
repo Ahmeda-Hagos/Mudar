@@ -20,7 +20,7 @@ export class AwsS3StorageService implements IStorageService {
     this.region = this.configService.get<string>('app.awsRegion') || 'eu-central-1';
     const accessKeyId = this.configService.get<string>('app.awsAccessKeyId');
     const secretAccessKey = this.configService.get<string>('app.awsSecretAccessKey');
-    this.bucketName = this.configService.get<string>('app.awsS3Bucket') || 'visaflow-sensitive-vault';
+    this.bucketName = this.configService.get<string>('app.awsS3Bucket') || 'mudar-sensitive-vault';
     this.kmsKeyId = this.configService.get<string>('app.awsKmsKeyId') || null;
 
     if (accessKeyId && secretAccessKey) {

@@ -1,10 +1,10 @@
-# Architecture Documentation — VisaFlow AI
+# Architecture Documentation — Mudar AI
 
-This guide documents the enterprise architecture of the VisaFlow AI SaaS platform.
+This guide documents the enterprise architecture of the Mudar AI SaaS platform.
 
 ## 1. Monorepo Workspace Structure
 ```
-visaflow-ai/              ← Workspace Root
+mudar-ai/              ← Workspace Root
   apps/
     web/                  ← Next.js 15 App (Frontend)
     api/                  ← NestJS API App (Backend)

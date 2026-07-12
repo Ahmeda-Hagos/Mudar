@@ -225,7 +225,7 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-/* Custom UI Component styles for VisaFlow AI */
+/* Custom UI Component styles for Mudar AI */
 
 /* Buttons */
 .btn {
@@ -1491,7 +1491,7 @@ body {
   text-align: left;
 }
 /* ============================================================
-   VisaFlow AI — Responsive Stylesheet
+   Mudar AI — Responsive Stylesheet
    Breakpoints:  1024px (tablet), 768px (small tablet), 480px (phone)
    ============================================================ */
 
@@ -1899,7 +1899,7 @@ body {
 .server-progress-fill.fill-warning { background: var(--warning); }
 .server-progress-fill.fill-danger  { background: var(--danger); }
 /* ================================================================
-   VisaFlow AI — Document Automation Studio
+   Mudar AI — Document Automation Studio
    form-studio.css
    ================================================================ */
 

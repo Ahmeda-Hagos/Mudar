@@ -3,13 +3,13 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: visaflow-postgres
+    container_name: mudar-postgres
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: visaflow_user
-      POSTGRES_PASSWORD: visaflow_password
-      POSTGRES_DB: visaflow_db
+      POSTGRES_USER: mudar_user
+      POSTGRES_PASSWORD: mudar_password
+      POSTGRES_DB: mudar_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

@@ -41,7 +41,7 @@ export class NotificationsService {
     }
 
     try {
-      const from = this.configService.get<string>('SMTP_FROM') || 'noreply@visaflow.ai';
+      const from = this.configService.get<string>('SMTP_FROM') || 'noreply@mudar.ai';
       await this.transporter.sendMail({ from, to, subject, html });
       return true;
     } catch (err: any) {
@@ -78,14 +78,14 @@ export class NotificationsService {
   async sendWelcomeEmail(email: string, tenantName: string) {
     const emailHtml = `
       <div style="font-family: sans-serif; padding: 20px; color: #333;">
-        <h2 style="color: #5b6ad0;">مرحباً بك في منصة فلو فيزا | Welcome to VisaFlow</h2>
+        <h2 style="color: #5b6ad0;">مرحباً بك في منصة فلو فيزا | Welcome to Mudar</h2>
         <p>عزيزي المشترك، يسعدنا انضمام وكالتكم <strong>${tenantName}</strong> إلى منصتنا.</p>
         <p>تم إعداد لوحة التحكم الخاصة بكم بنجاح، ويمكنكم الآن البدء في إدارة الطلبات وتعبئة النماذج تلقائياً.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-        <small style="color: #999;">VisaFlow AI Support Team</small>
+        <small style="color: #999;">Mudar AI Support Team</small>
       </div>
     `;
-    await this.sendEmail(email, 'مرحباً بك في فلو فيزا | Welcome to VisaFlow', emailHtml);
+    await this.sendEmail(email, 'مرحباً بك في فلو فيزا | Welcome to Mudar', emailHtml);
   }
 
   /**
@@ -98,7 +98,7 @@ export class NotificationsService {
         <p>نود تذكيركم بأن اشتراككم الحالي في الباقة <strong>${planName}</strong> سينتهي خلال <strong>${daysRemaining}</strong> أيام.</p>
         <p>لتجنب انقطاع الخدمة، يرجى مراجعة وتحديث تفاصيل الدفع في لوحة الإعدادات الخاصة بكم.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-        <small style="color: #999;">VisaFlow AI Billing Team</small>
+        <small style="color: #999;">Mudar AI Billing Team</small>
       </div>
     `;
     await this.sendEmail(email, 'تذكير بتجديد الاشتراك | Subscription Renewal Reminder', emailHtml);

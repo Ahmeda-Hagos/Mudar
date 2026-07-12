@@ -1,6 +1,6 @@
 # Saudi SDAIA & PDPL Compliance Specifications
 
-This document outlines the data governance, security architectures, and regional residency measures implemented in VisaFlow AI to satisfy the **Saudi Personal Data Protection Law (PDPL)** and **SDAIA (Saudi Data and AI Authority)** regulations. All claims made in this document reflect actual, audited, and verified system implementations.
+This document outlines the data governance, security architectures, and regional residency measures implemented in Mudar AI to satisfy the **Saudi Personal Data Protection Law (PDPL)** and **SDAIA (Saudi Data and AI Authority)** regulations. All claims made in this document reflect actual, audited, and verified system implementations.
 
 ## 1. Regional Data Residency
 All data collection, processing, and storage structures are restricted exclusively to the Kingdom of Saudi Arabia boundaries or compliant jurisdictions:
