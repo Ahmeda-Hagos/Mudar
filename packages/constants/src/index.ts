@@ -1,12 +1,12 @@
 /**
- * @visaflow/constants
+ * @mudar/constants
  *
  * All application-wide constants.
  * No magic numbers or hardcoded strings anywhere in the codebase.
  * Import from this package in both frontend and backend.
  */
 
-import { AppStatus, SubscriptionPlan, UserRole } from '@visaflow/types';
+import { AppStatus, SubscriptionPlan, UserRole } from '@mudar/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Application Status — ordered workflow
@@ -234,3 +234,4 @@ export const API_ROUTES = {
     MARK_READ: '/notifications/mark-read',
   },
 } as const;
+

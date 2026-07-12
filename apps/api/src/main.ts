@@ -74,7 +74,7 @@ async function bootstrap() {
   // ── Swagger (disabled in production) ───────────────────────────────────────
   if (nodeEnv !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('VisaFlow AI API')
+      .setTitle('Mudar API')
       .setDescription('Enterprise Visa Management Platform — REST API')
       .setVersion('1.0')
       .addBearerAuth()
@@ -102,7 +102,7 @@ async function bootstrap() {
 
   console.log(`
 ╔══════════════════════════════════════════════════╗
-║   VisaFlow AI API                                ║
+║   Mudar API                                ║
 ║   Environment : ${nodeEnv.padEnd(32)}║
 ║   Port        : ${String(port).padEnd(32)}║
 ║   Swagger     : http://localhost:${port}/docs${' '.repeat(14)}║
@@ -111,3 +111,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

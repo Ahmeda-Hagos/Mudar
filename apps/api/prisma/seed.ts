@@ -23,7 +23,7 @@ async function main() {
     where: { slug: 'system-hq' },
     update: {},
     create: {
-      name: 'VisaFlow Platform HQ',
+      name: 'Mudar HQ',
       slug: 'system-hq',
       settings: {
         officeAddress: 'Riyadh HQ',
@@ -46,11 +46,11 @@ async function main() {
   const hashedPassword = await bcrypt.hash('password123', salt);
 
   const superAdmin = await prisma.user.upsert({
-    where: { email: 'super@visaflow.ai' },
+    where: { email: 'super@mudar.ai' },
     update: {},
     create: {
       name: 'إدارة المنصة',
-      email: 'super@visaflow.ai',
+      email: 'super@mudar.ai',
       password: hashedPassword,
       role: Role.SUPER_ADMIN,
       tenantId: tenantSystem.id,
@@ -59,11 +59,11 @@ async function main() {
   });
 
   const agencyAdmin = await prisma.user.upsert({
-    where: { email: 'admin@visaflow.ai' },
+    where: { email: 'admin@mudar.ai' },
     update: {},
     create: {
       name: 'عبد الرحمن القحطاني',
-      email: 'admin@visaflow.ai',
+      email: 'admin@mudar.ai',
       password: hashedPassword,
       role: Role.ADMIN,
       tenantId: tenantDefault.id,
@@ -72,11 +72,11 @@ async function main() {
   });
 
   const employee = await prisma.user.upsert({
-    where: { email: 'احمد@visaflow.ai' },
+    where: { email: 'احمد@mudar.ai' },
     update: {},
     create: {
       name: 'أحمد الحربي',
-      email: 'احمد@visaflow.ai',
+      email: 'احمد@mudar.ai',
       password: hashedPassword,
       role: Role.EMPLOYEE,
       tenantId: tenantDefault.id,
@@ -160,3 +160,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+

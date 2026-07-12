@@ -1,4 +1,4 @@
-import { StorageCategory } from '@visaflow/constants';
+import { StorageCategory } from '@mudar/constants';
 
 /**
  * Storage Service interface.
@@ -39,3 +39,4 @@ export interface IStorageService {
 }
 
 export const IStorageServiceToken = Symbol('IStorageService');
+

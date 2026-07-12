@@ -15,7 +15,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<Theme>('dark');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('visaflow_theme') as Theme;
+    const savedTheme = localStorage.getItem('Mudar_theme') as Theme;
     if (savedTheme) {
       setThemeState(savedTheme);
       applyTheme(savedTheme);
@@ -36,7 +36,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setTheme = (nextTheme: Theme) => {
     setThemeState(nextTheme);
-    localStorage.setItem('visaflow_theme', nextTheme);
+    localStorage.setItem('Mudar_theme', nextTheme);
     applyTheme(nextTheme);
   };
 
@@ -54,3 +54,4 @@ export const useTheme = () => {
   }
   return context;
 };
+

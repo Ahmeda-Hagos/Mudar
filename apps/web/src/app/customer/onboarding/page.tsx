@@ -68,8 +68,8 @@ export default function OnboardingPage() {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('visaflow_token')}`,
-          'x-tenant-id': localStorage.getItem('visaflow_tenant_id') || '',
+          'Authorization': `Bearer ${localStorage.getItem('Mudar_token')}`,
+          'x-tenant-id': localStorage.getItem('Mudar_tenant_id') || '',
         },
         body: formData,
       });
@@ -214,3 +214,4 @@ export default function OnboardingPage() {
     </div>
   );
 }
+

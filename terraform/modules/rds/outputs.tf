@@ -1,10 +1,10 @@
 output "db_endpoint" {
-  value       = aws_db_instance.visaflow_db.endpoint
+  value       = aws_db_instance.mudar_db.endpoint
   description = "The connection endpoint for the RDS instance"
 }
 
 output "db_address" {
-  value       = aws_db_instance.visaflow_db.address
+  value       = aws_db_instance.mudar_db.address
   description = "The address of the RDS instance"
 }
 
@@ -14,7 +14,7 @@ output "ecs_security_group_id" {
 }
 
 output "vpc_id" {
-  value       = aws_vpc.visaflow_vpc.id
+  value       = aws_vpc.mudar_vpc.id
   description = "The ID of the VPC"
 }
 

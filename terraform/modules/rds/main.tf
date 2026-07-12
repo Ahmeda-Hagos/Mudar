@@ -6,61 +6,61 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-resource "aws_vpc" "visaflow_vpc" {
+resource "aws_vpc" "mudar_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "visaflow-vpc-${var.environment}"
+    Name = "mudar-vpc-${var.environment}"
   }
 }
 
 # Two private subnets for RDS and ECS Tasks
 resource "aws_subnet" "private_subnet_1" {
-  vpc_id            = aws_vpc.visaflow_vpc.id
+  vpc_id            = aws_vpc.mudar_vpc.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags = { Name = "visaflow-private-subnet-1-${var.environment}" }
+  tags = { Name = "mudar-private-subnet-1-${var.environment}" }
 }
 
 resource "aws_subnet" "private_subnet_2" {
-  vpc_id            = aws_vpc.visaflow_vpc.id
+  vpc_id            = aws_vpc.mudar_vpc.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = data.aws_availability_zones.available.names[1]
-  tags = { Name = "visaflow-private-subnet-2-${var.environment}" }
+  tags = { Name = "mudar-private-subnet-2-${var.environment}" }
 }
 
 # Two public subnets for ALB and NAT Gateway
 resource "aws_subnet" "public_subnet_1" {
-  vpc_id                  = aws_vpc.visaflow_vpc.id
+  vpc_id                  = aws_vpc.mudar_vpc.id
   cidr_block              = "10.0.101.0/24"
   availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
-  tags = { Name = "visaflow-public-subnet-1-${var.environment}" }
+  tags = { Name = "mudar-public-subnet-1-${var.environment}" }
 }
 
 resource "aws_subnet" "public_subnet_2" {
-  vpc_id                  = aws_vpc.visaflow_vpc.id
+  vpc_id                  = aws_vpc.mudar_vpc.id
   cidr_block              = "10.0.102.0/24"
   availability_zone       = data.aws_availability_zones.available.names[1]
   map_public_ip_on_launch = true
-  tags = { Name = "visaflow-public-subnet-2-${var.environment}" }
+  tags = { Name = "mudar-public-subnet-2-${var.environment}" }
 }
 
 # Internet Gateway for Public Subnets
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.visaflow_vpc.id
-  tags = { Name = "visaflow-igw-${var.environment}" }
+  vpc_id = aws_vpc.mudar_vpc.id
+  tags = { Name = "mudar-igw-${var.environment}" }
 }
 
 # Public Route Table
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.visaflow_vpc.id
+  vpc_id = aws_vpc.mudar_vpc.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-  tags = { Name = "visaflow-public-rt-${var.environment}" }
+  tags = { Name = "mudar-public-rt-${var.environment}" }
 }
 
 resource "aws_route_table_association" "public_rta_1" {
@@ -82,17 +82,17 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = aws_subnet.public_subnet_1.id
   depends_on    = [aws_internet_gateway.igw]
-  tags = { Name = "visaflow-nat-${var.environment}" }
+  tags = { Name = "mudar-nat-${var.environment}" }
 }
 
 # Private Route Table
 resource "aws_route_table" "private_rt" {
-  vpc_id = aws_vpc.visaflow_vpc.id
+  vpc_id = aws_vpc.mudar_vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
-  tags = { Name = "visaflow-private-rt-${var.environment}" }
+  tags = { Name = "mudar-private-rt-${var.environment}" }
 }
 
 resource "aws_route_table_association" "private_rta_1" {
@@ -106,7 +106,7 @@ resource "aws_route_table_association" "private_rta_2" {
 }
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "visaflow-rds-subnets-${var.environment}"
+  name       = "mudar-rds-subnets-${var.environment}"
   subnet_ids = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
 }
 
@@ -115,9 +115,9 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 # ---------------------------------------------------------
 
 resource "aws_security_group" "ecs_sg" {
-  name        = "visaflow-ecs-sg-${var.environment}"
+  name        = "mudar-ecs-sg-${var.environment}"
   description = "Security group for ECS Tasks"
-  vpc_id      = aws_vpc.visaflow_vpc.id
+  vpc_id      = aws_vpc.mudar_vpc.id
 
   # Egress to internet for API outbound calls (needs NAT gateway in a real scenario, or VPC endpoints)
   egress {
@@ -129,9 +129,9 @@ resource "aws_security_group" "ecs_sg" {
 }
 
 resource "aws_security_group" "rds_sg" {
-  name        = "visaflow-rds-sg-${var.environment}"
+  name        = "mudar-rds-sg-${var.environment}"
   description = "Security group for RDS"
-  vpc_id      = aws_vpc.visaflow_vpc.id
+  vpc_id      = aws_vpc.mudar_vpc.id
 
   # Allow ingress ONLY from the ECS security group on port 5432
   ingress {
@@ -154,7 +154,7 @@ resource "aws_security_group" "rds_sg" {
 # ---------------------------------------------------------
 
 resource "aws_db_parameter_group" "postgres_15" {
-  name   = "visaflow-pg15-${var.environment}"
+  name   = "mudar-pg15-${var.environment}"
   family = "postgres15"
 
   parameter {
@@ -167,8 +167,8 @@ resource "aws_db_parameter_group" "postgres_15" {
 # RDS Instance
 # ---------------------------------------------------------
 
-resource "aws_db_instance" "visaflow_db" {
-  identifier                  = "visaflow-db-${var.environment}"
+resource "aws_db_instance" "mudar_db" {
+  identifier                  = "mudar-db-${var.environment}"
   engine                      = "postgres"
   engine_version              = "15"
   instance_class              = var.db_instance_class
@@ -176,7 +176,7 @@ resource "aws_db_instance" "visaflow_db" {
   max_allocated_storage       = 100
   storage_type                = "gp3"
 
-  db_name                     = "visaflow"
+  db_name                     = "mudar"
   username                    = "postgres"
   password                    = var.db_password
 
@@ -191,7 +191,7 @@ resource "aws_db_instance" "visaflow_db" {
   multi_az                    = var.multi_az
   deletion_protection         = true
   skip_final_snapshot         = false
-  final_snapshot_identifier   = "visaflow-db-${var.environment}-final"
+  final_snapshot_identifier   = "mudar-db-${var.environment}-final"
   
   # Data Residency Lock: Ensure automated backups stay in region
   backup_retention_period     = 7

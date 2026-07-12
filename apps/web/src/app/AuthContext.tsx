@@ -21,9 +21,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('visaflow_token');
-    const savedUser = localStorage.getItem('visaflow_user');
-    const savedTenantId = localStorage.getItem('visaflow_tenant_id');
+    const savedToken = localStorage.getItem('Mudar_token');
+    const savedUser = localStorage.getItem('Mudar_user');
+    const savedTenantId = localStorage.getItem('Mudar_tenant_id');
 
     if (savedToken && savedUser && savedTenantId) {
       setToken(savedToken);
@@ -42,9 +42,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(data.accessToken);
       setTenantId(data.user.tenantId);
 
-      localStorage.setItem('visaflow_token', data.accessToken);
-      localStorage.setItem('visaflow_user', JSON.stringify(data.user));
-      localStorage.setItem('visaflow_tenant_id', data.user.tenantId);
+      localStorage.setItem('Mudar_token', data.accessToken);
+      localStorage.setItem('Mudar_user', JSON.stringify(data.user));
+      localStorage.setItem('Mudar_tenant_id', data.user.tenantId);
     } catch (err) {
       throw err;
     } finally {
@@ -56,9 +56,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setToken(null);
     setTenantId(null);
-    localStorage.removeItem('visaflow_token');
-    localStorage.removeItem('visaflow_user');
-    localStorage.removeItem('visaflow_tenant_id');
+    localStorage.removeItem('Mudar_token');
+    localStorage.removeItem('Mudar_user');
+    localStorage.removeItem('Mudar_tenant_id');
     window.location.href = '/';
   };
 
@@ -76,3 +76,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

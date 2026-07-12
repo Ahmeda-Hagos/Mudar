@@ -55,9 +55,9 @@ export default function Home() {
   };
 
   const completeSession = (data: any) => {
-    localStorage.setItem('visaflow_token', data.accessToken);
-    localStorage.setItem('visaflow_user', JSON.stringify(data.user));
-    localStorage.setItem('visaflow_tenant_id', data.user.tenantId);
+    localStorage.setItem('Mudar_token', data.accessToken);
+    localStorage.setItem('Mudar_user', JSON.stringify(data.user));
+    localStorage.setItem('Mudar_tenant_id', data.user.tenantId);
 
     // Route based on role
     if (data.user.role === 'ADMIN') {
@@ -88,13 +88,13 @@ export default function Home() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '4px', background: 'var(--primary)', color: '#ffffff', fontWeight: 900, fontSize: '0.9rem', letterSpacing: '-1px' }}>
               VF
             </div>
-            <span>VisaFlow</span>
+            <span>Mudar</span>
           </div>
 
           {/* Form Container */}
           <div style={{ maxWidth: '360px', width: '100%', margin: 'auto' }}>
             <h1 style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', marginBottom: '1.5rem', color: '#0d0d0d' }}>
-              {lang === 'ar' ? 'أهلاً بك في فلو فيزا' : 'Welcome to VisaFlow'}
+              {lang === 'ar' ? 'أهلاً بك في فلو فيزا' : 'Welcome to Mudar'}
             </h1>
 
             {loginError && (
@@ -158,7 +158,7 @@ export default function Home() {
             </div>
             
             <div style={{ fontSize: '0.72rem', color: '#a0aec0', textAlign: 'center', marginTop: '1rem', background: '#f7fafc', padding: '6px', borderRadius: '4px' }}>
-              {lang === 'ar' ? 'تجربة: super@visaflow.ai | password123' : 'Sandbox: super@visaflow.ai | password123'}
+              {lang === 'ar' ? 'تجربة: super@Mudar.ai | password123' : 'Sandbox: super@Mudar.ai | password123'}
             </div>
           </div>
 
@@ -183,3 +183,6 @@ export default function Home() {
     </div>
   );
 }
+
+
+

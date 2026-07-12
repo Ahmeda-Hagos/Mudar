@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '@visaflow/types';
+import { UserRole } from '@mudar/types';
 
 /**
  * TenantAccessGuard — Enforces tenant data isolation at the middleware gate.
@@ -55,3 +55,4 @@ export class TenantAccessGuard implements CanActivate {
     return true;
   }
 }
+

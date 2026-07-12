@@ -4,7 +4,7 @@ import { ThemeProvider } from './ThemeContext';
 import { AuthProvider } from './AuthContext';
 
 export const metadata = {
-  title: 'VisaFlow AI — نظام إدارة التأشيرات الذكي',
+  title: 'Mudar | ????????? — نظام إدارة التأشيرات الذكي',
   description: 'نظام إدارة طلبات التأشيرات الذكي للشركات السياحية ومكاتب الخدمات',
 };
 
@@ -27,3 +27,4 @@ export default function RootLayout({
     </html>
   );
 }
+

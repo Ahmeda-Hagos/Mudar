@@ -1,5 +1,5 @@
 /**
- * VisaFlow AI — API Client
+ * Mudar | ????????? — API Client
  * Coordinates all HTTP fetch requests between Frontend and NestJS Server.
  * Automatically handles JWT Bearer authentication and Tenant security headers.
  */
@@ -12,11 +12,11 @@ export class ApiClient {
     };
 
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('visaflow_token');
+      const token = localStorage.getItem('Mudar_token');
       if (token) {
         defaultHeaders['Authorization'] = `Bearer ${token}`;
       }
-      const tenantId = localStorage.getItem('visaflow_tenant_id');
+      const tenantId = localStorage.getItem('Mudar_tenant_id');
       if (tenantId) {
         defaultHeaders['x-tenant-id'] = tenantId;
       }
@@ -87,3 +87,4 @@ export class ApiClient {
     return response.json();
   }
 }
+

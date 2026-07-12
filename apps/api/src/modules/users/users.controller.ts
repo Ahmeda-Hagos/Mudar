@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { TenantId } from '../../common/decorators/tenant-id.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '@visaflow/types';
+import { UserRole } from '@mudar/types';
 
 @ApiTags('users')
 @Controller({ path: 'users', version: '1' })
@@ -37,3 +37,4 @@ export class UsersController {
     return this.usersService.delete(tenantId, id);
   }
 }
+

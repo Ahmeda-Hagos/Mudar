@@ -252,10 +252,10 @@ export default function SuperAdminDashboard() {
                                 <button className="btn btn-secondary btn-sm" onClick={(e) => {
                                   e.stopPropagation();
                                   // Impersonate triggers
-                                  const mockAdminUser = { id: 'usr-admin', name: 'عبد الرحمن القحطاني', email: 'admin@visaflow.ai', role: 'ADMIN', tenantId: tenant.id };
-                                  localStorage.setItem('visaflow_token', 'mock-admin-token');
-                                  localStorage.setItem('visaflow_user', JSON.stringify(mockAdminUser));
-                                  localStorage.setItem('visaflow_tenant_id', tenant.id);
+                                  const mockAdminUser = { id: 'usr-admin', name: 'عبد الرحمن القحطاني', email: 'admin@Mudar.ai', role: 'ADMIN', tenantId: tenant.id };
+                                  localStorage.setItem('Mudar_token', 'mock-admin-token');
+                                  localStorage.setItem('Mudar_user', JSON.stringify(mockAdminUser));
+                                  localStorage.setItem('Mudar_tenant_id', tenant.id);
                                   window.location.href = '/admin/dashboard';
                                 }}>
                                   دخول كمدير
@@ -433,3 +433,6 @@ export default function SuperAdminDashboard() {
     </div>
   );
 }
+
+
+

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { IBillingService } from './billing.service.interface';
 import { PrismaService } from '../../database/prisma.service';
-import { Subscription, SubscriptionPlan } from '@visaflow/types';
+import { Subscription, SubscriptionPlan } from '@mudar/types';
 
 @Injectable()
 export class StripeBillingService implements IBillingService {
@@ -62,3 +62,4 @@ export class StripeBillingService implements IBillingService {
     });
   }
 }
+

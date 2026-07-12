@@ -121,9 +121,9 @@ export const TRANSLATIONS = {
     optionalDocsList: "المستندات الاختيارية الداعمة",
   },
   en: {
-    appName: "VisaFlow AI",
+    appName: "Mudar | ?????????",
     slogan: "Smart Visa Application Management System for Agencies and Offices",
-    portalTitle: "VisaFlow AI Portal",
+    portalTitle: "Mudar | ????????? Portal",
     selectRole: "Select account type to test and begin:",
     adminRole: "System Admin",
     adminDesc: "Manage employees, performance analytics, document templates, and system settings.",
@@ -243,3 +243,4 @@ export const TRANSLATIONS = {
   }
 };
 export type Lang = 'ar' | 'en';
+

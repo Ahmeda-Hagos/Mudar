@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { IStorageService } from './storage.service.interface';
-import { StorageCategory, buildStoragePath } from '@visaflow/constants';
+import { StorageCategory, buildStoragePath } from '@mudar/constants';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
@@ -155,3 +155,4 @@ export class SupabaseStorageService implements IStorageService {
     return `https://mock.supabase.storage/object/public/${this.bucketName}/${storagePath}`;
   }
 }
+

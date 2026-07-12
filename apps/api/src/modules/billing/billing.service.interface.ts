@@ -1,4 +1,4 @@
-import { Subscription } from '@visaflow/types';
+import { Subscription } from '@mudar/types';
 
 /**
  * Billing Service interface.
@@ -22,3 +22,4 @@ export interface IBillingService {
 }
 
 export const IBillingServiceToken = Symbol('IBillingService');
+

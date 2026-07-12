@@ -1,8 +1,10 @@
 {
-  "name": "@visaflow/constants",
+  "name": "@mudar/constants",
   "version": "1.0.0",
   "private": true,
-  "description": "Shared application constants for VisaFlow AI",
+  "description": "Shared application constants for Mudar AI",
   "main": "./src/index.ts",
   "types": "./src/index.ts"
 }
+
+

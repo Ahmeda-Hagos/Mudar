@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { TenantsService } from './tenants.service';
 import { TenantId } from '../../common/decorators/tenant-id.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '@visaflow/types';
+import { UserRole } from '@mudar/types';
 
 @ApiTags('tenants')
 @Controller({ path: 'tenants', version: '1' })
@@ -29,3 +29,4 @@ export class TenantsController {
     return this.tenantsService.updateSettings(tenantId, settings);
   }
 }
+

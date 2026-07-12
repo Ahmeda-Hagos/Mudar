@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ExtractedPassportData } from '@visaflow/types';
+import { ExtractedPassportData } from '@mudar/types';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
 import { ConfigService } from '@nestjs/config';
 
@@ -94,3 +94,4 @@ export class OcrService {
     return match ? match[1].trim() : null;
   }
 }
+

@@ -1,4 +1,4 @@
-import { AuthUser, UserRole } from '@visaflow/types';
+import { AuthUser, UserRole } from '@mudar/types';
 
 /**
  * Authentication service contract.
@@ -43,3 +43,4 @@ export interface IAuthService {
 }
 
 export const IAuthServiceToken = Symbol('IAuthService');
+

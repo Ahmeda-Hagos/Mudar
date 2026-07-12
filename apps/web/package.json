@@ -9,8 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@visaflow/constants": "^1.0.0",
-    "@visaflow/types": "^1.0.0",
+    "@mudar/constants": "^1.0.0",
+    "@mudar/types": "^1.0.0",
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -26,3 +26,5 @@
     "typescript": "^5"
   }
 }
+
+

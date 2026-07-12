@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '@visaflow/types';
+import { UserRole } from '@mudar/types';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -29,3 +29,4 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
+

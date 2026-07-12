@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../database/prisma.service';
 import { IAuthService } from './auth.service.interface';
-import { AuthUser, UserRole } from '@visaflow/types';
+import { AuthUser, UserRole } from '@mudar/types';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import * as speakeasy from 'speakeasy';
@@ -321,3 +321,4 @@ export class SupabaseAuthService implements IAuthService {
     };
   }
 }
+

@@ -7,26 +7,26 @@ data "aws_region" "current" {}
 
 # Store secrets in SSM Parameter Store
 resource "aws_ssm_parameter" "database_url" {
-  name  = "/visaflow/${var.environment}/database_url"
+  name  = "/mudar/${var.environment}/database_url"
   type  = "SecureString"
-  value = "postgresql://visaflow_app:${var.db_password}@${var.db_endpoint}/visaflow?schema=public"
+  value = "postgresql://mudar_app:${var.db_password}@${var.db_endpoint}/mudar?schema=public"
 }
 
 resource "aws_ssm_parameter" "database_url_admin" {
-  name  = "/visaflow/${var.environment}/database_url_admin"
+  name  = "/mudar/${var.environment}/database_url_admin"
   type  = "SecureString"
-  value = "postgresql://visaflow_admin:${var.db_password}@${var.db_endpoint}/visaflow?schema=public"
+  value = "postgresql://mudar_admin:${var.db_password}@${var.db_endpoint}/mudar?schema=public"
 }
 
 resource "aws_ssm_parameter" "jwt_secret" {
-  name  = "/visaflow/${var.environment}/jwt_secret"
+  name  = "/mudar/${var.environment}/jwt_secret"
   type  = "SecureString"
   value = var.jwt_secret
 }
 
 # Task Execution Role (used by ECS agent to pull images and read secrets)
 resource "aws_iam_role" "ecs_execution_role" {
-  name = "visaflow-ecs-exec-role-${var.environment}"
+  name = "mudar-ecs-exec-role-${var.environment}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -43,7 +43,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_policy" {
 }
 
 resource "aws_iam_role_policy" "ecs_execution_secrets" {
-  name = "visaflow-ecs-secrets-${var.environment}"
+  name = "mudar-ecs-secrets-${var.environment}"
   role = aws_iam_role.ecs_execution_role.name
   policy = jsonencode({
     Version = "2012-10-17"
@@ -61,7 +61,7 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
 
 # Task Role (used by the running container)
 resource "aws_iam_role" "ecs_task_role" {
-  name = "visaflow-ecs-task-role-${var.environment}"
+  name = "mudar-ecs-task-role-${var.environment}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -73,7 +73,7 @@ resource "aws_iam_role" "ecs_task_role" {
 }
 
 resource "aws_iam_role_policy" "ecs_task_s3" {
-  name = "visaflow-ecs-s3-${var.environment}"
+  name = "mudar-ecs-s3-${var.environment}"
   role = aws_iam_role.ecs_task_role.name
   policy = jsonencode({
     Version = "2012-10-17"
@@ -81,7 +81,7 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
       {
         Effect = "Allow"
         Action = ["s3:PutObject", "s3:GetObject"]
-        Resource = "arn:aws:s3:::visaflow-sensitive-vault-${var.environment}/*"
+        Resource = "arn:aws:s3:::mudar-sensitive-vault-${var.environment}/*"
       },
       {
         Effect = "Allow"
@@ -97,7 +97,7 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
 # ---------------------------------------------------------
 
 resource "aws_security_group" "alb_sg" {
-  name        = "visaflow-alb-sg-${var.environment}"
+  name        = "mudar-alb-sg-${var.environment}"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -125,7 +125,7 @@ resource "aws_security_group_rule" "ecs_from_alb" {
 }
 
 resource "aws_lb" "api_alb" {
-  name               = "visaflow-alb-${var.environment}"
+  name               = "mudar-alb-${var.environment}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
@@ -133,7 +133,7 @@ resource "aws_lb" "api_alb" {
 }
 
 resource "aws_lb_target_group" "api_tg" {
-  name        = "visaflow-tg-${var.environment}"
+  name        = "mudar-tg-${var.environment}"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -149,7 +149,7 @@ resource "aws_lb_target_group" "api_tg" {
 }
 
 resource "aws_lb_target_group" "web_tg" {
-  name        = "visaflow-web-tg-${var.environment}"
+  name        = "mudar-web-tg-${var.environment}"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -195,7 +195,7 @@ resource "aws_lb_listener_rule" "api_routing" {
 # Elastic Container Registry (ECR)
 # ---------------------------------------------------------
 resource "aws_ecr_repository" "api_repo" {
-  name                 = "visaflow-api-${var.environment}"
+  name                 = "mudar-api-${var.environment}"
   image_tag_mutability = "MUTABLE"
   force_delete         = true # Allow easy teardown for this burner environment
 
@@ -205,7 +205,7 @@ resource "aws_ecr_repository" "api_repo" {
 }
 
 resource "aws_ecr_repository" "web_repo" {
-  name                 = "visaflow-web-${var.environment}"
+  name                 = "mudar-web-${var.environment}"
   image_tag_mutability = "MUTABLE"
   force_delete         = true # Allow easy teardown for this burner environment
 
@@ -219,26 +219,26 @@ resource "aws_ecr_repository" "web_repo" {
 # ---------------------------------------------------------
 
 resource "aws_ecs_cluster" "cluster" {
-  name = "visaflow-cluster-${var.environment}"
+  name = "mudar-cluster-${var.environment}"
 }
 
 resource "aws_cloudwatch_log_group" "api_logs" {
-  name              = "/ecs/visaflow-api-${var.environment}"
+  name              = "/ecs/mudar-api-${var.environment}"
   retention_in_days = 7
 }
 
 resource "aws_cloudwatch_log_group" "migration_logs" {
-  name              = "/ecs/visaflow-migration-${var.environment}"
+  name              = "/ecs/mudar-migration-${var.environment}"
   retention_in_days = 7
 }
 
 resource "aws_cloudwatch_log_group" "web_logs" {
-  name              = "/ecs/visaflow-web-${var.environment}"
+  name              = "/ecs/mudar-web-${var.environment}"
   retention_in_days = 7
 }
 
 resource "aws_ecs_task_definition" "api" {
-  family                   = "visaflow-api-${var.environment}"
+  family                   = "mudar-api-${var.environment}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 256
@@ -282,7 +282,7 @@ resource "aws_ecs_task_definition" "api" {
 }
 
 resource "aws_ecs_task_definition" "web" {
-  family                   = "visaflow-web-${var.environment}"
+  family                   = "mudar-web-${var.environment}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 256
@@ -321,7 +321,7 @@ resource "aws_ecs_task_definition" "web" {
 }
 
 resource "aws_ecs_task_definition" "migration" {
-  family                   = "visaflow-migration-${var.environment}"
+  family                   = "mudar-migration-${var.environment}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 256
@@ -350,7 +350,7 @@ resource "aws_ecs_task_definition" "migration" {
 }
 
 resource "aws_ecs_service" "api_service" {
-  name            = "visaflow-api-service-${var.environment}"
+  name            = "mudar-api-service-${var.environment}"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.api.arn
   desired_count   = 1
@@ -374,7 +374,7 @@ resource "aws_ecs_service" "api_service" {
 }
 
 resource "aws_ecs_service" "web_service" {
-  name            = "visaflow-web-service-${var.environment}"
+  name            = "mudar-web-service-${var.environment}"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.web.arn
   desired_count   = 1

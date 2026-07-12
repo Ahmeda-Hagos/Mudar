@@ -17,7 +17,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [dir, setDir] = useState<'rtl' | 'ltr'>('rtl');
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('visaflow_lang') as Lang;
+    const savedLang = localStorage.getItem('Mudar_lang') as Lang;
     if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
       setLangState(savedLang);
       setDir(savedLang === 'ar' ? 'rtl' : 'ltr');
@@ -27,7 +27,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setLang = (nextLang: Lang) => {
     setLangState(nextLang);
     setDir(nextLang === 'ar' ? 'rtl' : 'ltr');
-    localStorage.setItem('visaflow_lang', nextLang);
+    localStorage.setItem('Mudar_lang', nextLang);
   };
 
   const t = (key: string, variables?: Record<string, string>): string => {
@@ -59,3 +59,4 @@ export const useI18n = () => {
   }
   return context;
 };
+

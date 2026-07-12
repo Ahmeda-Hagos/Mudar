@@ -5,7 +5,7 @@ import { ApplicationsService } from './applications.service';
 import { TenantId } from '../../common/decorators/tenant-id.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '@visaflow/types';
+import { UserRole } from '@mudar/types';
 import { AppStatus } from '@prisma/client';
 
 @ApiTags('applications')
@@ -70,3 +70,4 @@ export class ApplicationsController {
     return this.applicationsService.saveTravelAccommodation(tenantId, id, user.id, user.name, travelAccommodation);
   }
 }
+

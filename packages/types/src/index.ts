@@ -1,5 +1,5 @@
 /**
- * @visaflow/types
+ * @mudar/types
  *
  * Single source of truth for all shared TypeScript types across the platform.
  * Imported by both apps/web (frontend) and apps/api (backend).
@@ -367,3 +367,4 @@ export interface ApiError {
   timestamp: string;
   path: string;
 }
+

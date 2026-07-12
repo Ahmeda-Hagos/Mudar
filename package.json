@@ -1,8 +1,8 @@
 {
-  "name": "visaflow-ai",
+  "name": "Mudar-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "VisaFlow AI — Enterprise Visa Management SaaS Platform",
+  "description": "Mudar AI — Enterprise Visa Management SaaS Platform",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -28,3 +28,4 @@
     "npm": ">=10.0.0"
   }
 }
+

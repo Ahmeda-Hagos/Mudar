@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { IStorageService } from './storage.service.interface';
-import { StorageCategory, buildStoragePath } from '@visaflow/constants';
+import { StorageCategory, buildStoragePath } from '@mudar/constants';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
@@ -190,3 +190,4 @@ export class AwsS3StorageService implements IStorageService {
     return `https://mock.presigned.s3.${this.region}.amazonaws.com/${this.bucketName}/${storagePath}?expires=${expiresInSeconds}`;
   }
 }
+

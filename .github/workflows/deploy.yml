@@ -32,7 +32,7 @@ jobs:
       run: npm run lint --if-present || true
 
     - name: Run Prisma Code Generation
-      run: npm run prisma:generate --workspace=visaflow-backend
+      run: npm run prisma:generate --workspace=mudar-backend
       env:
         DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
 
@@ -73,7 +73,7 @@ jobs:
 
     - name: Ensure Terraform State Bucket Exists
       run: |
-        aws s3 mb s3://visaflow-tf-burner-state-49172 --region eu-central-1 || true
+        aws s3 mb s3://mudar-tf-burner-state-49172 --region eu-central-1 || true
 
     - name: Terraform Init (Staging)
       run: terraform init
@@ -94,7 +94,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR (Staging)
       env:
         ECR_REGISTRY: ${{ steps.login-ecr-staging.outputs.registry }}
-        ECR_REPOSITORY: visaflow-api-staging-v2
+        ECR_REPOSITORY: mudar-api-staging-v2
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/api/Dockerfile .
@@ -103,12 +103,12 @@ jobs:
 
     - name: Force ECS Service Update (Staging API)
       run: |
-        aws ecs update-service --cluster visaflow-cluster-staging-v2 --service visaflow-api-service-staging-v2 --force-new-deployment
+        aws ecs update-service --cluster mudar-cluster-staging-v2 --service mudar-api-service-staging-v2 --force-new-deployment
 
     - name: Build, tag, and push WEB image to Amazon ECR (Staging)
       env:
         ECR_REGISTRY: ${{ steps.login-ecr-staging.outputs.registry }}
-        ECR_REPOSITORY: visaflow-web-staging-v2
+        ECR_REPOSITORY: mudar-web-staging-v2
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/web/Dockerfile .
@@ -117,7 +117,7 @@ jobs:
 
     - name: Force ECS Service Update (Staging Web)
       run: |
-        aws ecs update-service --cluster visaflow-cluster-staging-v2 --service visaflow-web-service-staging-v2 --force-new-deployment
+        aws ecs update-service --cluster mudar-cluster-staging-v2 --service mudar-web-service-staging-v2 --force-new-deployment
 
     # Note: ECS Fargate Migration Task triggering would go here.
 
@@ -162,7 +162,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR (Production)
       env:
         ECR_REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
-        ECR_REPOSITORY: visaflow-api-production-v2
+        ECR_REPOSITORY: mudar-api-production-v2
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/api/Dockerfile .
@@ -171,12 +171,12 @@ jobs:
 
     - name: Force ECS Service Update (Production API)
       run: |
-        aws ecs update-service --cluster visaflow-cluster-production-v2 --service visaflow-api-service-production-v2 --force-new-deployment
+        aws ecs update-service --cluster mudar-cluster-production-v2 --service mudar-api-service-production-v2 --force-new-deployment
 
     - name: Build, tag, and push WEB image to Amazon ECR (Production)
       env:
         ECR_REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
-        ECR_REPOSITORY: visaflow-web-production-v2
+        ECR_REPOSITORY: mudar-web-production-v2
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/web/Dockerfile .
@@ -185,6 +185,6 @@ jobs:
 
     - name: Force ECS Service Update (Production Web)
       run: |
-        aws ecs update-service --cluster visaflow-cluster-production-v2 --service visaflow-web-service-production-v2 --force-new-deployment
+        aws ecs update-service --cluster mudar-cluster-production-v2 --service mudar-web-service-production-v2 --force-new-deployment
 
     # Note: ECS Fargate Migration Task triggering would go here.

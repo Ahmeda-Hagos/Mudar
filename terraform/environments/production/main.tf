@@ -6,7 +6,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "visaflow-tf-burner-state-49172"
+    bucket = "mudar-tf-burner-state-49172"
     key    = "production-v2/terraform.tfstate"
     region = "eu-central-1"
   }
